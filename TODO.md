@@ -1,6 +1,9 @@
-- [x] Update home.html to display stock on product cards
-- [x] Update modal to show available stock and limit input
-- [x] Modify tambah_ke_keranjang view to check and decrease stock
-- [x] Modify update_jumlah view to adjust stock on quantity changes
-- [x] Modify hapus_item view to restore stock
-- [x] Update JavaScript to refresh stock display after actions
+- [ ] Add Customer model and update Transaksi model in kasir/models.py
+- [ ] Create and run migration for new models
+- [ ] Add halaman_bayar, proses_bayar, halaman_struk views in kasir/views.py
+- [ ] Create kasir/templates/bayar.html template
+- [ ] Create kasir/templates/struk.html template
+- [ ] Update kasir/templates/home.html to add Bayar button
+- [ ] Update kasir/urls.py with new paths
+- [ ] Run makemigrations and migrate
+- [ ] Test payment flow

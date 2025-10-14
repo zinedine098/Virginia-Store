@@ -1,9 +1,10 @@
 # views.py
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
-from .models import Produk, Transaksi, DetailTransaksi
+from .models import Produk, Transaksi, DetailTransaksi, Customer
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Sum
 import json
 
 def halaman_kasir(request):
@@ -111,3 +112,53 @@ def hapus_item(request):
             "produk_id": produk.id,
             "new_stok": produk.stok
         })
+
+
+def halaman_bayar(request):
+    transaksi = get_object_or_404(Transaksi, no_transaksi="120024")
+    details = DetailTransaksi.objects.filter(transaksi=transaksi)
+    total = details.aggregate(Sum('subtotal'))['subtotal__sum'] or 0
+    customers = Customer.objects.all()
+    return render(request, 'bayar.html', {
+        'transaksi': transaksi,
+        'details': details,
+        'total': total,
+        'customers': customers
+    })
+
+
+def proses_bayar(request):
+    if request.method == 'POST':
+        transaksi = get_object_or_404(Transaksi, no_transaksi="120024")
+        customer_id = request.POST.get('customer')
+        payment_method = request.POST.get('payment_method')
+        amount_paid = float(request.POST.get('amount_paid', 0))
+        total = float(request.POST.get('total', 0))
+        change = amount_paid - total
+
+        if customer_id:
+            customer = get_object_or_404(Customer, id=customer_id)
+            transaksi.customer = customer
+        transaksi.payment_method = payment_method
+        transaksi.amount_paid = amount_paid
+        transaksi.change = change
+        transaksi.save()
+
+        # Generate new no_transaksi for next transaction
+        # For simplicity, increment the number
+        new_no = str(int(transaksi.no_transaksi) + 1).zfill(6)
+        Transaksi.objects.create(no_transaksi=new_no)
+
+        return redirect('halaman_struk', transaksi_id=transaksi.id)
+    return redirect('halaman_kasir')
+
+
+def halaman_struk(request, transaksi_id):
+    transaksi = get_object_or_404(Transaksi, id=transaksi_id)
+    details = DetailTransaksi.objects.filter(transaksi=transaksi)
+    total = details.aggregate(Sum('subtotal'))['subtotal__sum'] or 0
+    return render(request, 'struk.html', {
+        'transaksi': transaksi,
+        'details': details,
+        'total': total
+    })
