@@ -1,0 +1,74 @@
+/* Custom styles for the navbar */
+.navbar {
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover img {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.nav-link {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 3px;
+  background-color: #fff;
+  border-radius: 3px;
+}
+
+.dropdown-menu {
+  animation: fadeIn 0.3s ease;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.dropdown-item {
+  padding: 0.75rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+  padding-left: 1.5rem;
+}
+
+.dropdown-item i {
+  width: 20px;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 992px) {
+  .navbar-nav {
+    padding-top: 1rem;
+  }
+
+  .nav-link.active::after {
+    display: none;
+  }
+}
