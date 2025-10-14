@@ -9,11 +9,12 @@
       <div class="row">
         {% for item in produk %}
         <div class="col-md-3 mb-3">
-          <div class="card text-center" onclick="bukaDetail('{{ item.id }}', '{{ item.nama_barang }}', '{{ item.harga_barang }}')">
+          <div class="card text-center" onclick="bukaDetail('{{ item.id }}', '{{ item.nama_barang }}', '{{ item.harga_barang }}', '{{ item.stok }}')">
             <img src="{{ item.gambar.url }}" class="card-img-top" style="height:180px; object-fit:cover;">
             <div class="card-body">
               <h6>{{ item.nama_barang }}</h6>
               <p>Rp. {{ item.harga_barang|floatformat:0 }}</p>
+              <p>Stok: <span id="stok-{{ item.id }}">{{ item.stok }}</span></p>
             </div>
           </div>
         </div>
@@ -37,7 +38,8 @@
         <div class="modal-header"><h5 id="namaProduk"></h5></div>
         <div class="modal-body">
           <p>Harga: Rp <span id="hargaProduk"></span></p>
-          <input type="number" id="jumlahBeli" class="form-control" placeholder="Masukkan jumlah">
+          <p>Stok Tersedia: <span id="stokProduk"></span></p>
+          <input type="number" id="jumlahBeli" class="form-control" placeholder="Masukkan jumlah" min="1">
         </div>
         <div class="modal-footer">
           <button class="btn btn-primary" onclick="tambahKeranjang()">Tambahkan</button>
@@ -51,11 +53,13 @@
 let produkIdAktif = null;
 let hargaAktif = 0;
 
-function bukaDetail(id, nama, harga) {
+function bukaDetail(id, nama, harga, stok) {
   produkIdAktif = id;
   hargaAktif = harga;
   document.getElementById('namaProduk').textContent = nama;
   document.getElementById('hargaProduk').textContent = harga;
+  document.getElementById('stokProduk').textContent = stok;
+  document.getElementById('jumlahBeli').max = stok;
   new bootstrap.Modal(document.getElementById('modalProduk')).show();
 }
 
@@ -81,7 +85,11 @@ async function tambahKeranjang() {
       const row = `<tr data-produk="${data.produk}" data-detail-id="${data.detail_id}"><td>${data.produk}</td><td>Rp ${hargaAktif.toLocaleString()}</td><td><div class="d-flex align-items-center justify-content-center"><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${data.detail_id}, 'kurangi')">-</button><span class="mx-2">${data.jumlah}</span><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${data.detail_id}, 'tambah')">+</button></div></td><td>Rp ${data.subtotal.toLocaleString()}</td><td><button class="btn btn-sm btn-danger" onclick="hapusItem(${data.detail_id})">Hapus</button></td></tr>`;
       tbody.insertAdjacentHTML('beforeend', row);
     }
+    // Update stok di card
+    document.getElementById(`stok-${produkIdAktif}`).textContent = data.new_stok;
     bootstrap.Modal.getInstance(document.getElementById('modalProduk')).hide();
+  } else {
+    alert(data.message || "Stok tidak cukup!");
   }
 }
 
@@ -97,6 +105,8 @@ async function updateJumlah(detailId, action) {
     const row = document.querySelector(`tr[data-detail-id="${detailId}"]`);
     row.cells[2].innerHTML = `<div class="d-flex align-items-center justify-content-center"><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${detailId}, 'kurangi')">-</button><span class="mx-2">${data.jumlah}</span><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${detailId}, 'tambah')">+</button></div>`;
     row.cells[3].textContent = `Rp ${data.subtotal.toLocaleString()}`;
+    // Update stok di card
+    document.getElementById(`stok-${data.produk_id}`).textContent = data.new_stok;
   }
 }
 
@@ -111,6 +121,8 @@ async function hapusItem(detailId) {
   if (data.status === "success") {
     const row = document.querySelector(`tr[data-detail-id="${detailId}"]`);
     row.remove();
+    // Update stok di card
+    document.getElementById(`stok-${data.produk_id}`).textContent = data.new_stok;
   }
 }
 </script>

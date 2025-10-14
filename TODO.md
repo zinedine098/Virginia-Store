@@ -1,4 +1,6 @@
-- [x] Update innerHTML in tambahKeranjang() for existing row to use flex layout for quantity buttons
-- [x] Update row string in tambahKeranjang() for new row to use flex layout for quantity buttons
-- [x] Update innerHTML in updateJumlah() to use flex layout for quantity buttons
-- [x] Test the changes by running the Django server and checking the cart table (user can run python manage.py runserver to test)
+- [x] Update home.html to display stock on product cards
+- [x] Update modal to show available stock and limit input
+- [x] Modify tambah_ke_keranjang view to check and decrease stock
+- [x] Modify update_jumlah view to adjust stock on quantity changes
+- [x] Modify hapus_item view to restore stock
+- [x] Update JavaScript to refresh stock display after actions

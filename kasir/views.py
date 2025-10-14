@@ -20,6 +20,12 @@ def tambah_ke_keranjang(request):
 
         produk = get_object_or_404(Produk, id=produk_id)
 
+        if produk.stok < jumlah:
+            return JsonResponse({
+                "status": "error",
+                "message": "Stok tidak cukup!"
+            })
+
         # Buat transaksi baru jika belum ada (dummy)
         transaksi, _ = Transaksi.objects.get_or_create(no_transaksi="120024")
 
@@ -39,12 +45,17 @@ def tambah_ke_keranjang(request):
                 subtotal=subtotal
             )
 
+        # Kurangi stok
+        produk.stok -= jumlah
+        produk.save()
+
         return JsonResponse({
             "status": "success",
             "produk": produk.nama_barang,
             "jumlah": detail.jumlah,
             "subtotal": float(detail.subtotal),
-            "detail_id": detail.id
+            "detail_id": detail.id,
+            "new_stok": produk.stok
         })
 
 
@@ -56,17 +67,29 @@ def update_jumlah(request):
         action = data.get('action')  # 'tambah' or 'kurangi'
 
         detail = get_object_or_404(DetailTransaksi, id=detail_id)
+        produk = detail.produk
         if action == 'tambah':
-            detail.jumlah += 1
+            if produk.stok > 0:
+                detail.jumlah += 1
+                produk.stok -= 1
+            else:
+                return JsonResponse({
+                    "status": "error",
+                    "message": "Stok tidak cukup!"
+                })
         elif action == 'kurangi' and detail.jumlah > 1:
             detail.jumlah -= 1
-        detail.subtotal = detail.jumlah * detail.produk.harga_barang
+            produk.stok += 1
+        detail.subtotal = detail.jumlah * produk.harga_barang
         detail.save()
+        produk.save()
 
         return JsonResponse({
             "status": "success",
             "jumlah": detail.jumlah,
-            "subtotal": float(detail.subtotal)
+            "subtotal": float(detail.subtotal),
+            "produk_id": produk.id,
+            "new_stok": produk.stok
         })
 
 
@@ -77,6 +100,14 @@ def hapus_item(request):
         detail_id = data.get('detail_id')
 
         detail = get_object_or_404(DetailTransaksi, id=detail_id)
+        produk = detail.produk
+        # Kembalikan stok
+        produk.stok += detail.jumlah
+        produk.save()
         detail.delete()
 
-        return JsonResponse({"status": "success"})
+        return JsonResponse({
+            "status": "success",
+            "produk_id": produk.id,
+            "new_stok": produk.stok
+        })
