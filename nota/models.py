@@ -11,6 +11,10 @@ class NotaKosong(models.Model):
     def __str__(self):
         return f"{self.kode_barang} - {self.nama_barang}"
 
+    @property
+    def subtotal(self):
+        return self.harga * self.jumlah_barang
+
     class Meta:
         verbose_name = "Nota Kosong"
         verbose_name_plural = "Daftar Nota Kosong"

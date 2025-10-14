@@ -1,5 +1,105 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Ini adalah halaman nota kosong</h1>
-<p>Halaman ini menampilkan informasi nota kosong.</p>
+<h3>Isi Barang sebagai Nota Kosong</h3>
+
+<form method="POST" enctype="multipart/form-data" class="row g-3">
+    {% csrf_token %}
+    <div class="col-md-4">{{ form.kode_barang }}</div>
+    <div class="col-md-4">{{ form.nama_barang }}</div>
+    <div class="col-md-4">{{ form.deskripsi }}</div>
+    <div class="col-md-4">{{ form.jumlah_barang }}</div>
+    <div class="col-md-4">{{ form.harga }}</div>
+    <div class="col-md-4">{{ form.gambar }}</div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-warning">+ Tambah</button>
+    </div>
+</form>
+
+<hr>
+
+<h4>Keranjang Nota Kosong</h4>
+<table class="table table-bordered table-striped mt-3">
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Kode Barang</th>
+            <th>Gambar Barang</th>
+            <th>Nama Barang</th>
+            <th>Deskripsi</th>
+            <th>Jumlah</th>
+            <th>Harga</th>
+            <th>Subtotal</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for barang in daftar_barang %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ barang.kode_barang }}</td>
+            <td>
+                {% if barang.gambar %}
+                    <img src="{{ barang.gambar.url }}" width="60">
+                {% endif %}
+            </td>
+            <td>{{ barang.nama_barang }}</td>
+            <td>{{ barang.deskripsi }}</td>
+            <td>
+                <button class="btn btn-sm btn-secondary" onclick="updateQuantity({{ barang.id }}, -1)">-</button>
+                <span id="qty-{{ barang.id }}">{{ barang.jumlah_barang }}</span>
+                <button class="btn btn-sm btn-secondary" onclick="updateQuantity({{ barang.id }}, 1)">+</button>
+            </td>
+            <td>Rp. <span id="harga-{{ barang.id }}">{{ barang.harga|floatformat:0 }}</span></td>
+            <td>Rp. <span id="subtotal-{{ barang.id }}">{{ barang.subtotal|floatformat:0 }}</span></td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="editItem({{ barang.id }})">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteItem({{ barang.id }})">Delete</button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center">Belum ada data</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+function updateQuantity(id, change) {
+    fetch(`/nota/update_quantity/${id}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({ change: change })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`qty-${id}`).textContent = data.new_quantity;
+            document.getElementById(`subtotal-${id}`).textContent = data.new_subtotal;
+        }
+    });
+}
+
+function editItem(id) {
+    // Redirect to edit page or open modal
+    window.location.href = `/nota/edit/${id}/`;
+}
+
+function deleteItem(id) {
+    if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
+        fetch(`/nota/delete/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
 {% endblock %}
