@@ -39,21 +39,20 @@
             <td>{{ barang.kode_barang }}</td>
             <td>
                 {% if barang.gambar %}
-                    <img src="{{ barang.gambar.url }}" width="60">
+                    <img src="{{ barang.gambar }}" width="60">
                 {% endif %}
             </td>
             <td>{{ barang.nama_barang }}</td>
             <td>{{ barang.deskripsi }}</td>
             <td>
-                <button class="btn btn-sm btn-secondary" onclick="updateQuantity({{ barang.id }}, -1)">-</button>
+                <button class="btn btn-sm btn-secondary" onclick="updateQuantity('{{ barang.id }}', -1)">-</button>
                 <span id="qty-{{ barang.id }}">{{ barang.jumlah_barang }}</span>
-                <button class="btn btn-sm btn-secondary" onclick="updateQuantity({{ barang.id }}, 1)">+</button>
+                <button class="btn btn-sm btn-secondary" onclick="updateQuantity('{{ barang.id }}', 1)">+</button>
             </td>
             <td>Rp. <span id="harga-{{ barang.id }}">{{ barang.harga|floatformat:0 }}</span></td>
-            <td>Rp. <span id="subtotal-{{ barang.id }}">{{ barang.subtotal|floatformat:0 }}</span></td>
+            <td>Rp. <span id="subtotal-{{ barang.id }}">{{ barang.subtotal|default:0|floatformat:0 }}</span></td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="editItem({{ barang.id }})">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteItem({{ barang.id }})">Delete</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteItem('{{ barang.id }}')">Delete</button>
             </td>
         </tr>
         {% empty %}
