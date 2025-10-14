@@ -3,6 +3,13 @@
 
 {% block content %}
 <div class="container mt-3">
+  {% if messages %}
+  <div class="alert alert-success">
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+  </div>
+  {% endif %}
   <h4>🛒 Selamat Belanja</h4>
   <div class="row">
     <div class="col-md-8">
@@ -55,6 +62,21 @@
 <script>
 let produkIdAktif = null;
 let hargaAktif = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadKeranjang();
+});
+
+async function loadKeranjang() {
+  const response = await fetch("{% url 'get_keranjang' %}");
+  const data = await response.json();
+  const tbody = document.querySelector("#tabelKeranjang tbody");
+  tbody.innerHTML = '';
+  data.details.forEach(detail => {
+    const row = `<tr data-produk="${detail.produk}" data-detail-id="${detail.detail_id}"><td>${detail.produk}</td><td>Rp ${detail.harga.toLocaleString()}</td><td><div class="d-flex align-items-center justify-content-center"><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${detail.detail_id}, 'kurangi')">-</button><span class="mx-2">${detail.jumlah}</span><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${detail.detail_id}, 'tambah')">+</button></div></td><td>Rp ${detail.subtotal.toLocaleString()}</td><td><button class="btn btn-sm btn-danger" onclick="hapusItem(${detail.detail_id})">Hapus</button></td></tr>`;
+    tbody.insertAdjacentHTML('beforeend', row);
+  });
+}
 
 function bukaDetail(id, nama, harga, stok) {
   produkIdAktif = id;
