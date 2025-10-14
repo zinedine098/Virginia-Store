@@ -1,0 +1,4 @@
+- [x] Update innerHTML in tambahKeranjang() for existing row to use flex layout for quantity buttons
+- [x] Update row string in tambahKeranjang() for new row to use flex layout for quantity buttons
+- [x] Update innerHTML in updateJumlah() to use flex layout for quantity buttons
+- [x] Test the changes by running the Django server and checking the cart table (user can run python manage.py runserver to test)

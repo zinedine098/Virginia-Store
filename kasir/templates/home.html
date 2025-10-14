@@ -24,7 +24,7 @@
       <!-- Tabel Keranjang -->
       <h5 class="mt-4">🧾 Keranjang Belanja</h5>
       <table class="table table-bordered" id="tabelKeranjang">
-        <thead><tr><th>Barang</th><th>Harga</th><th>Jumlah</th><th>Subtotal</th></tr></thead>
+        <thead><tr><th>Barang</th><th>Harga</th><th>Jumlah</th><th>Subtotal</th><th>Aksi</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -70,9 +70,47 @@ async function tambahKeranjang() {
 
   if (data.status === "success") {
     const tbody = document.querySelector("#tabelKeranjang tbody");
-    const row = `<tr><td>${data.produk}</td><td>Rp ${hargaAktif.toLocaleString()}</td><td>${data.jumlah}</td><td>Rp ${data.subtotal.toLocaleString()}</td></tr>`;
-    tbody.insertAdjacentHTML('beforeend', row);
+    // Cek apakah produk sudah ada di tabel
+    const existingRow = tbody.querySelector(`tr[data-produk="${data.produk}"]`);
+    if (existingRow) {
+      // Update jumlah dan subtotal jika sudah ada
+      existingRow.cells[2].innerHTML = `<div class="d-flex align-items-center justify-content-center"><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${data.detail_id}, 'kurangi')">-</button><span class="mx-2">${data.jumlah}</span><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${data.detail_id}, 'tambah')">+</button></div>`;
+      existingRow.cells[3].textContent = `Rp ${data.subtotal.toLocaleString()}`;
+    } else {
+      // Tambah baris baru jika belum ada
+      const row = `<tr data-produk="${data.produk}" data-detail-id="${data.detail_id}"><td>${data.produk}</td><td>Rp ${hargaAktif.toLocaleString()}</td><td><div class="d-flex align-items-center justify-content-center"><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${data.detail_id}, 'kurangi')">-</button><span class="mx-2">${data.jumlah}</span><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${data.detail_id}, 'tambah')">+</button></div></td><td>Rp ${data.subtotal.toLocaleString()}</td><td><button class="btn btn-sm btn-danger" onclick="hapusItem(${data.detail_id})">Hapus</button></td></tr>`;
+      tbody.insertAdjacentHTML('beforeend', row);
+    }
     bootstrap.Modal.getInstance(document.getElementById('modalProduk')).hide();
+  }
+}
+
+async function updateJumlah(detailId, action) {
+  const response = await fetch("{% url 'update_jumlah' %}", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+    body: JSON.stringify({ detail_id: detailId, action: action })
+  });
+  const data = await response.json();
+
+  if (data.status === "success") {
+    const row = document.querySelector(`tr[data-detail-id="${detailId}"]`);
+    row.cells[2].innerHTML = `<div class="d-flex align-items-center justify-content-center"><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${detailId}, 'kurangi')">-</button><span class="mx-2">${data.jumlah}</span><button class="btn btn-sm btn-secondary" onclick="updateJumlah(${detailId}, 'tambah')">+</button></div>`;
+    row.cells[3].textContent = `Rp ${data.subtotal.toLocaleString()}`;
+  }
+}
+
+async function hapusItem(detailId) {
+  const response = await fetch("{% url 'hapus_item' %}", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+    body: JSON.stringify({ detail_id: detailId })
+  });
+  const data = await response.json();
+
+  if (data.status === "success") {
+    const row = document.querySelector(`tr[data-detail-id="${detailId}"]`);
+    row.remove();
   }
 }
 </script>
