@@ -1,61 +1,230 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Kasir App</title>
+    
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Favicon -->
     <link rel="icon" href="{% static 'image/logo.png' %}">
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
-      <div class="container-fluid">
-        <img src="{% static 'image/logo.png' %}" alt="logo" height="45">
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNavDropdown"
-          aria-controls="navbarNavDropdown"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavDropdown">
-          <ul class="navbar-nav mx-5">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{% url 'halaman_kasir' %}">Stock</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
+
+    <!-- Custom CSS untuk Tema Gelap -->
+    <style>
+        :root {
+            --bg-primary: #1a1a1b; /* Latar belakang paling gelap */
+            --bg-secondary: #272728; /* Latar belakang navbar, sidebar header/footer */
+            --bg-tertiary: #343536; /* Latar belakang item, card */
+            --text-primary: #d7dadc; /* Teks utama */
+            --text-secondary: #b0b3b8; /* Teks sekunder/menengah */
+            --text-muted: #818384; /* Teks tidak aktif/petunjuk */
+            --accent-color: #4f9cf9; /* Warna aksen biru */
+            --accent-hover: #3a8bdf; /* Warna aksen saat hover */
+            --danger-color: #e74c3c;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* ================== NAVBAR CUSTOM ================== */
+        .navbar-custom {
+            background-color: var(--bg-secondary) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            padding: 0.75rem 1rem;
+            z-index: 1030; /* Pastikan di atas konten */
+        }
+
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: var(--text-primary) !important;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .navbar-custom .nav-link:hover,
+        .navbar-custom .nav-link.active {
+            color: var(--accent-color) !important;
+        }
+
+        .navbar-custom .navbar-toggler {
+            border-color: var(--text-secondary);
+        }
+
+        .navbar-custom .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28215, 218, 220, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* Dropdown Menu Dark Theme */
+        .navbar-custom .dropdown-menu {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--bg-secondary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .navbar-custom .dropdown-item {
+            color: var(--text-primary);
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .navbar-custom .dropdown-item:hover {
+            background-color: var(--bg-secondary);
+            color: var(--accent-color);
+        }
+
+        .navbar-custom .dropdown-divider {
+            border-color: var(--bg-secondary);
+        }
+
+        /* ================== CONTENT AREA ================== */
+        /* Gaya default untuk heading */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary);
+        }
+
+        /* Gaya default untuk card (jika ada di halaman lain) */
+        .card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        .card-header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--bg-primary);
+        }
+
+        /* Gaya default untuk form */
+        .form-control {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        .form-control:focus {
+            background-color: var(--bg-tertiary);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(79, 156, 249, 0.25);
+            color: var(--text-primary);
+        }
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+        .form-select {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(79, 156, 249, 0.25);
+        }
+
+        /* Gaya default untuk tombol */
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+        .btn-secondary {
+            background-color: var(--bg-tertiary);
+            border-color: var(--text-secondary);
+            color: var(--text-primary);
+        }
+        .btn-secondary:hover {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Gaya untuk tabel (jika ada di halaman lain) */
+        .table {
+            --bs-table-bg: var(--bg-tertiary);
+            --bs-table-striped-bg: var(--bg-secondary);
+            --bs-table-color: var(--text-primary);
+            --bs-table-border-color: var(--bg-primary);
+            --bs-table-hover-bg: #3a3a3c;
+        }
+
+        /* Gaya untuk alert */
+        .alert-success {
+            background-color: #1a3d1a;
+            border-color: #2a5a2a;
+            color: #b8e6b8;
+        }
+        .alert-danger {
+            background-color: #3d1a1a;
+            border-color: #5a2a2a;
+            color: #e6b8b8;
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'halaman_kasir' %}">
+                <img src="{% static 'image/logo.png' %}" alt="logo" height="35" class="me-2">
+                <strong>KasirApp</strong>
+            </a>
+            <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown"
                 aria-expanded="false"
-              >
-                Menu Khusus
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Nota Kosong</a></li>
-                <li><a class="dropdown-item" href="#">Cetak nota kosong</a></li>
-                <li>
-                  <a class="dropdown-item" href="#">Nota Supleyer</a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="#">Cetak Supleyer</a>
-                </li>
-              </ul>
-            </li>
-          </ul>
+                aria-label="Toggle navigation"
+            >
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav mx-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'halaman_kasir' %}">
+                            <i class="fas fa-box me-1"></i> Stock
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a
+                            class="nav-link dropdown-toggle"
+                            href="#"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            <i class="fas fa-cog me-1"></i> Menu Khusus
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice me-2"></i> Nota Kosong</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-print me-2"></i> Cetak Nota Kosong</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice-dollar me-2"></i> Nota Suplayer</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-print me-2"></i> Cetak Suplayer</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
-      </div>
     </nav>
-    {% block content %} {% endblock %}
+
+    <div class="content-wrapper">
+        {% block content %} {% endblock %}
+    </div>
+
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-  </body>
+</body>
 </html>
