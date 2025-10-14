@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-3">
+  <h4>🛒 Selamat Belanja</h4>
+  <div class="row">
+    <div class="col-md-8">
+      <div class="row">
+        {% for item in produk %}
+        <div class="col-md-3 mb-3">
+          <div class="card text-center" onclick="bukaDetail('{{ item.id }}', '{{ item.nama_barang }}', '{{ item.harga_barang }}')">
+            <img src="{{ item.gambar.url }}" class="card-img-top" style="height:180px; object-fit:cover;">
+            <div class="card-body">
+              <h6>{{ item.nama_barang }}</h6>
+              <p>Rp. {{ item.harga_barang|floatformat:0 }}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-md-4">
+      <!-- Tabel Keranjang -->
+      <h5 class="mt-4">🧾 Keranjang Belanja</h5>
+      <table class="table table-bordered" id="tabelKeranjang">
+        <thead><tr><th>Barang</th><th>Harga</th><th>Jumlah</th><th>Subtotal</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Input Jumlah -->
+  <div class="modal" id="modalProduk" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 id="namaProduk"></h5></div>
+        <div class="modal-body">
+          <p>Harga: Rp <span id="hargaProduk"></span></p>
+          <input type="number" id="jumlahBeli" class="form-control" placeholder="Masukkan jumlah">
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" onclick="tambahKeranjang()">Tambahkan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let produkIdAktif = null;
+let hargaAktif = 0;
+
+function bukaDetail(id, nama, harga) {
+  produkIdAktif = id;
+  hargaAktif = harga;
+  document.getElementById('namaProduk').textContent = nama;
+  document.getElementById('hargaProduk').textContent = harga;
+  new bootstrap.Modal(document.getElementById('modalProduk')).show();
+}
+
+async function tambahKeranjang() {
+  const jumlah = document.getElementById('jumlahBeli').value;
+  const response = await fetch("{% url 'tambah_ke_keranjang' %}", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+    body: JSON.stringify({ produk_id: produkIdAktif, jumlah: jumlah })
+  });
+  const data = await response.json();
+
+  if (data.status === "success") {
+    const tbody = document.querySelector("#tabelKeranjang tbody");
+    const row = `<tr><td>${data.produk}</td><td>Rp ${hargaAktif.toLocaleString()}</td><td>${data.jumlah}</td><td>Rp ${data.subtotal.toLocaleString()}</td></tr>`;
+    tbody.insertAdjacentHTML('beforeend', row);
+    bootstrap.Modal.getInstance(document.getElementById('modalProduk')).hide();
+  }
+}
+</script>
+{% endblock %}
