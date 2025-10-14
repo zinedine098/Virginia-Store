@@ -72,3 +72,32 @@
     display: none;
   }
 }
+
+/* Sticky cart sidebar styles */
+.cart-sidebar {
+  position: fixed;
+  top: 4rem; /* Below sticky navbar */
+  right: 15px;
+  width: 300px;
+  height: calc(100vh - 4rem);
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+/* Ensure content doesn't overlap with sidebar */
+.container {
+  margin-right: 320px;
+}
+
+@media (max-width: 768px) {
+  .cart-sidebar {
+    display: none; /* Hide sidebar on mobile */
+  }
+  .container {
+    margin-right: 0;
+  }
+}

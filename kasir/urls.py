@@ -11,6 +11,7 @@ urlpatterns = [
     path('proses-bayar/', views.proses_bayar, name='proses_bayar'),
     path('struk/<int:transaksi_id>/', views.halaman_struk, name='halaman_struk'),
     path('batalkan-transaksi/', views.batalkan_transaksi, name='batalkan_transaksi'),
+    path('get-produk-by-barcode/', views.get_produk_by_barcode, name='get_produk_by_barcode'),
     # path('produk/', views.produk, name='produk'),
     # path('nota-kosong/', views.nota_kosong, name='nota-kosong'),
     # path('cetak-nota-kosong/', views.cetak_nota_kosong, name='cetak-nota-kosong'),

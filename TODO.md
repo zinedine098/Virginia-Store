@@ -1,14 +1,18 @@
-# TODO: Fix Cart Reset After Payment
+# TODO: Fix Cashier App Issues
 
-## Steps to Complete:
-- [x] Modify halaman_kasir to manage current transaksi in session and show messages
-- [x] Add new view: get_keranjang (JSON of current details)
-- [x] Update URLs for new view
-- [x] Update tambah_ke_keranjang to use session transaksi
-- [x] Update update_jumlah to use session transaksi
-- [x] Update hapus_item to use session transaksi
-- [x] Update halaman_bayar to use session transaksi
-- [x] Update proses_bayar to use session transaksi, clear session after success, add message
-- [x] Update batalkan_transaksi to use session transaksi
-- [x] Update home.html: Add JS to load cart on load, update add/update/hapus
-- [x] Test the flow
+## Issue 1: Product Image Not Showing in Modal for Barcode Input
+- [x] Add image element to modal in home.html
+- [x] Modify bukaDetail function to accept and display image URL
+- [x] Update cariProdukByBarcode to pass image URL to bukaDetail
+
+## Issue 2: Cart Updates Require Reload in Both Modes
+- [x] Make cart functions mode-aware (detect current visible table: #tabelKeranjang or #tabelKeranjangBarcode)
+- [x] Update tambahKeranjang to update correct table
+- [x] Update updateJumlah to update correct table
+- [x] Update hapusItem to update correct table
+- [x] Update loadKeranjang to be mode-aware or unify with loadKeranjangBarcode
+- [x] Ensure calculateTotal and calculateTotalBarcode are called correctly
+
+## Testing
+- [ ] Test card mode: add/update/remove items, check immediate updates
+- [ ] Test barcode mode: input barcode, check image in modal, add/update/remove items, check immediate updates

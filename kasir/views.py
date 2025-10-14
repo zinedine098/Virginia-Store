@@ -218,6 +218,25 @@ def halaman_struk(request, transaksi_id):
     })
 
 
+def get_produk_by_barcode(request):
+    barcode = request.GET.get('barcode')
+    if not barcode:
+        return JsonResponse({"status": "error", "message": "Barcode tidak diberikan"})
+    try:
+        produk = Produk.objects.get(barcode=barcode)
+        data = {
+            "status": "success",
+            "id": produk.id,
+            "nama_barang": produk.nama_barang,
+            "harga_barang": float(produk.harga_barang),
+            "stok": produk.stok,
+            "gambar": produk.gambar.url if produk.gambar else ""
+        }
+        return JsonResponse(data)
+    except Produk.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Produk tidak ditemukan"})
+
+
 def batalkan_transaksi(request):
     transaksi_id = request.session.get('current_transaksi_id')
     if not transaksi_id:
