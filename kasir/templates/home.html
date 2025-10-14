@@ -297,7 +297,7 @@
         {% for item in produk %}
         <div class="col-6 col-md-4 col-lg-3">
           <div class="card product-card" onclick="bukaDetail('{{ item.id }}', '{{ item.nama_barang }}', '{{ item.harga_barang }}', '{{ item.stok }}', '{{ item.gambar.url }}')">
-            <img src="{{ item.gambar.url }}" class="card-img-top" style="height:180px; object-fit:cover;" alt="{{ item.nama_barang }}">
+            <img src="{{ item.gambar.url }}" class="card-img-top" style="height:250px; object-fit:cover;" alt="{{ item.nama_barang }}">
             <div class="card-body">
               <h6 class="card-title">{{ item.nama_barang }}</h6>
               <div>
