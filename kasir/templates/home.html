@@ -282,12 +282,19 @@
     <!-- Tombol Toggle Mode -->
     <div class="mb-4">
       <div class="mode-toggle-container">
-        <button class="btn btn-primary" onclick="toggleMode('card')">
+        <!-- <button class="btn btn-primary" onclick="toggleMode('card')">
           <i class="fas fa-th-large me-2"></i>Pilih Produk
         </button>
         <button class="btn btn-secondary" onclick="toggleMode('barcode')">
           <i class="fas fa-barcode me-2"></i>Input Barcode
-        </button>
+        </button> -->
+        <div class="input-group mb-3">
+          <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+          <input type="text" id="barcodeInput" class="form-control" placeholder="Masukan barcode" onkeypress="if(event.key === 'Enter'){cariProdukByBarcode()}">
+          <button class="btn btn-primary" onclick="cariProdukByBarcode()">
+            <i class="fas fa-search me-2"></i>
+          </button>
+        </div>
       </div>
     </div>
 
