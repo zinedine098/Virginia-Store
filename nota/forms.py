@@ -1,5 +1,6 @@
 from django import forms
-from .models import NotaKosong
+from .models import NotaKosong, NotaPayment
+from kasir.models import Customer
 
 class NotaKosongForm(forms.ModelForm):
     class Meta:
@@ -13,4 +14,16 @@ class NotaKosongForm(forms.ModelForm):
             'jumlah_barang': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'QTY'}),
             'harga': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Harga Barang'}),
             'gambar': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+
+class NotaPaymentForm(forms.ModelForm):
+    class Meta:
+        model = NotaPayment
+        fields = ['customer', 'tanggal_sisa_bayar', 'metode_pembayaran', 'dp']
+
+        widgets = {
+            'customer': forms.Select(attrs={'class': 'form-control'}),
+            'tanggal_sisa_bayar': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'metode_pembayaran': forms.Select(attrs={'class': 'form-control'}),
+            'dp': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'DP'}),
         }

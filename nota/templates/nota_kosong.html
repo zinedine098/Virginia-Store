@@ -5,6 +5,7 @@
 
     <form method="POST" enctype="multipart/form-data" class="row g-3">
         {% csrf_token %}
+        <input type="hidden" name="add_item" value="1">
         <div class="col-md-4">{{ form.kode_barang }}</div>
         <div class="col-md-4">{{ form.nama_barang }}</div>
         <div class="col-md-4">{{ form.deskripsi }}</div>
@@ -61,6 +62,42 @@
             {% endfor %}
         </tbody>
     </table>
+
+    {% if daftar_barang %}
+    <hr>
+    <h4>Pembayaran</h4>
+    <form method="POST" id="payment-form" class="row g-3">
+        {% csrf_token %}
+        <input type="hidden" name="submit_payment" value="1">
+        <div class="col-md-4">
+            <label for="id_customer" class="form-label">Pelanggan</label>
+            {{ payment_form.customer }}
+        </div>
+        <div class="col-md-4">
+            <label for="id_tanggal_sisa_bayar" class="form-label">Tanggal Sisa Bayar</label>
+            {{ payment_form.tanggal_sisa_bayar }}
+        </div>
+        <div class="col-md-4">
+            <label for="id_metode_pembayaran" class="form-label">Metode Pembayaran</label>
+            {{ payment_form.metode_pembayaran }}
+        </div>
+        <div class="col-md-4">
+            <label for="id_total_bayar" class="form-label">Total Bayar</label>
+            <input type="text" class="form-control" id="id_total_bayar" value="Rp. {{ total|floatformat:0 }}" readonly>
+        </div>
+        <div class="col-md-4">
+            <label for="id_dp" class="form-label">DP</label>
+            {{ payment_form.dp }}
+        </div>
+        <div class="col-md-4">
+            <label for="id_sisa" class="form-label">Sisa yang Harus Dibayar</label>
+            <input type="text" class="form-control" id="id_sisa" readonly>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">Submit</button>
+        </div>
+    </form>
+    {% endif %}
 </div>
 
 <script>
@@ -78,6 +115,7 @@ function updateQuantity(id, change) {
         if (data.success) {
             document.getElementById(`qty-${id}`).textContent = data.new_quantity;
             document.getElementById(`subtotal-${id}`).textContent = data.new_subtotal;
+            updateTotal();
         }
     });
 }
@@ -102,5 +140,28 @@ function deleteItem(id) {
         });
     }
 }
+
+function updateTotal() {
+    let total = 0;
+    document.querySelectorAll('[id^="subtotal-"]').forEach(el => {
+        const subtotal = parseFloat(el.textContent.replace(/[^\d]/g, '')) || 0;
+        total += subtotal;
+    });
+    document.getElementById('id_total_bayar').value = `Rp. ${total.toLocaleString('id-ID')}`;
+    updateSisa();
+}
+
+function updateSisa() {
+    const totalText = document.getElementById('id_total_bayar').value;
+    const total = parseFloat(totalText.replace(/[^\d]/g, '')) || 0;
+    const dp = parseFloat(document.getElementById('id_dp').value) || 0;
+    const sisa = total - dp;
+    document.getElementById('id_sisa').value = `Rp. ${sisa.toLocaleString('id-ID')}`;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateTotal();
+    document.getElementById('id_dp').addEventListener('input', updateSisa);
+});
 </script>
 {% endblock %}
