@@ -7,11 +7,11 @@
     <!-- Header Atas -->
     <div class="d-flex justify-content-between align-items-start" id="hitam">
       <div>
-        <p class="small m-0">{{ transaksi.tanggal|date:"d/m/y, H:i A" }}</p>
-        <p class="small m-0" id="hitam">Virginia | Halaman Kasir</p>
+        <p class="small m-0">{{ nota.created_at|date:"d/m/y, H:i A" }}</p>
+        <p class="small m-0" id="hitam">Virginia | Nota Kosong</p>
       </div>
       <div class="text-end">
-        <p class="small m-0 fw-bold" id="hitam">INVOICE{{ transaksi.kode_nota|default:"120026" }}</p>
+        <p class="small m-0 fw-bold" id="hitam">INVOICE{{ nota.id }}</p>
       </div>
     </div>
 
@@ -35,8 +35,9 @@
         <p class="m-0" id="hitam"><strong>EMAIL</strong> : {{ informasi_toko.email|default:"harrykweel@hotmail.com" }}</p>
       </div>
       <div class="col-4 text-end" id="hitam">
-        <p class="m-0"><strong>DATE</strong> : 15 October 2025</p>
-        <p class="m-0"><strong>CUSTOMER</strong> : {% if transaksi.customer %}{{ transaksi.customer.nama }}{% else %}-{% endif %}</p>
+        <p class="m-0"><strong>DATE</strong> : {{ nota.created_at|date:"d M Y" }}</p>
+        <p class="m-0"><strong>COSTUMER</strong> : {{ nota.customer.nama|default:"Umum" }}</p>
+        <p class="m-0"><strong>TANGGAL SISA BAYAR</strong> : {{ nota.tanggal_sisa_bayar|date:"d M Y" }}</p>
       </div>
     </div>
 
@@ -53,20 +54,20 @@
         </tr>
       </thead>
       <tbody>
-        {% for detail in details %}
+        {% for item in items %}
         <tr>
-          <td>{{ detail.produk.barcode }}</td>
+          <td>{{ item.kode_barang }}</td>
           <td>
-            {% if detail.produk.gambar %}
-              <img src="{{ detail.produk.gambar.url }}" class="foto-produk">
+            {% if item.gambar %}
+              <img src="{{ item.gambar }}" class="foto-produk">
             {% else %}
               <span>-</span>
             {% endif %}
           </td>
-          <td>{{ detail.produk.nama_barang }}</td>
-          <td>{{ detail.jumlah }}</td>
-          <td>Rp. {{ detail.produk.harga_barang|floatformat:0 }}</td>
-          <td>Rp. {{ detail.subtotal|floatformat:0 }}</td>
+          <td>{{ item.nama_barang }}</td>
+          <td>{{ item.jumlah_barang }}</td>
+          <td>Rp. {{ item.harga|floatformat:0 }}</td>
+          <td>Rp. {{ item.subtotal|floatformat:0 }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -76,13 +77,21 @@
     <table class="table table-bordered text-end">
       <tr>
         <td><strong>TOTAL</strong></td>
-        <td style="width: 120px;"><strong>Rp. {{ total|floatformat:0 }}</strong></td>
+        <td style="width: 120px;"><strong>Rp. {{ nota.total_bayar|floatformat:0 }}</strong></td>
+      </tr>
+      <tr>
+        <td><strong>DP</strong></td>
+        <td style="width: 120px;"><strong>Rp. {{ nota.dp|floatformat:0 }}</strong></td>
+      </tr>
+      <tr>
+        <td><strong>SISA BAYAR</strong></td>
+        <td style="width: 120px;"><strong>Rp. {{ nota.sisa|floatformat:0 }}</strong></td>
       </tr>
     </table>
   </div>
   <div class="text-center mt-3 d-print-none">
       <button class="btn btn-primary btn-sm" onclick="window.print()">Cetak Struk</button>
-      <a href="{% url 'halaman_kasir' %}" class="btn btn-secondary btn-sm">Kembali ke Kasir</a>
+      <a href="{% url 'nota:cetak-nota-kosong' %}" class="btn btn-secondary btn-sm">Kembali</a>
   </div>
 </div>
 

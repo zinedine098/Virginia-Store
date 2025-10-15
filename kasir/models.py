@@ -12,6 +12,9 @@ class Produk(models.Model):
 
 class Customer(models.Model):
     nama = models.CharField(max_length=100)
+    alamat_customer = models.TextField(blank=True, null=True)
+    no_telpon_customer = models.CharField(max_length=20, blank=True, null=True)
+    shipping_agent = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return self.nama
@@ -42,3 +45,17 @@ class DetailTransaksi(models.Model):
 
     def __str__(self):
         return f"{self.produk.nama_barang} x {self.jumlah}"
+
+class InformasiToko(models.Model):
+    address = models.TextField()
+    factory = models.TextField()
+    phone = models.CharField(max_length=50)
+    mobile = models.CharField(max_length=50)
+    email = models.EmailField()
+
+    def __str__(self):
+        return "Informasi Toko"
+
+    class Meta:
+        verbose_name = "Informasi Toko"
+        verbose_name_plural = "Informasi Toko"

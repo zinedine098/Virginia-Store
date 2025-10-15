@@ -2,6 +2,17 @@ from django import forms
 from .models import NotaKosong, NotaPayment
 from kasir.models import Customer
 
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = ['nama', 'alamat_customer', 'no_telpon_customer', 'shipping_agent']
+        widgets = {
+            'nama': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama Pelanggan'}),
+            'alamat_customer': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Alamat', 'rows': 2}),
+            'no_telpon_customer': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'No. Telepon'}),
+            'shipping_agent': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Shipping Agent'}),
+        }
+
 class NotaKosongForm(forms.ModelForm):
     class Meta:
         model = NotaKosong

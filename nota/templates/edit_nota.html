@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="" style="margin-left: 20px; margin-right: 20px;">
+<div class="" style="margin-left: 20px; margin-right: 20px; margin-bottom: 30px;">
     {% if messages %}
         <div class="alert alert-danger">
             {% for message in messages %}
@@ -8,11 +8,11 @@
             {% endfor %}
         </div>
     {% endif %}
-    <h5>Isi Barang Nota Kosong</h5>
+    <h5>Edit Nota Kosong</h5>
 
-    <form method="POST" enctype="multipart/form-data" class="row g-3">
+    <form method="POST" enctype="multipart/form-data" class="row g-3" id="item-form">
         {% csrf_token %}
-        <input type="hidden" name="add_item" value="1">
+        <input type="hidden" name="item_id" id="item_id" value="">
         <div class="col-md-4">{{ form.kode_barang }}</div>
         <div class="col-md-4">{{ form.nama_barang }}</div>
         <div class="col-md-4">{{ form.deskripsi }}</div>
@@ -20,7 +20,8 @@
         <div class="col-md-4">{{ form.harga }}</div>
         <div class="col-md-4">{{ form.gambar }}</div>
         <div class="col-12">
-            <button type="submit" class="btn btn-warning">+ Tambah</button>
+            <button type="submit" name="add_item" class="btn btn-warning" id="submit-btn">+ Tambah</button>
+            <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Batal</button>
         </div>
     </form>
 
@@ -43,7 +44,7 @@
         </thead>
         <tbody>
             {% for barang in daftar_barang %}
-            <tr>
+            <tr data-id="{{ barang.id }}" data-kode="{{ barang.kode_barang }}" data-nama="{{ barang.nama_barang }}" data-deskripsi="{{ barang.deskripsi|default:'' }}" data-jumlah="{{ barang.jumlah_barang }}" data-harga="{{ barang.harga }}">
                 <td>{{ forloop.counter }}</td>
                 <td>{{ barang.kode_barang }}</td>
                 <td>
@@ -61,6 +62,7 @@
                 <td>Rp. <span id="harga-{{ barang.id }}">{{ barang.harga|floatformat:0 }}</span></td>
                 <td>Rp. <span id="subtotal-{{ barang.id }}">{{ barang.subtotal|default:0|floatformat:0 }}</span></td>
                 <td>
+                    <button class="btn btn-sm btn-info" onclick="editItem('{{ barang.id }}')">Edit</button>
                     <button class="btn btn-sm btn-danger" onclick="deleteItem('{{ barang.id }}')">Delete</button>
                 </td>
             </tr>
@@ -77,10 +79,7 @@
         <input type="hidden" name="submit_payment" value="1">
         <div class="col-md-4">
             <label for="id_customer" class="form-label">Pelanggan</label>
-            <div class="input-group">
-                {{ payment_form.customer }}
-                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCustomerModal">Tambah</button>
-            </div>
+            {{ payment_form.customer }}
         </div>
         <div class="col-md-4">
             <label for="id_tanggal_sisa_bayar" class="form-label">Tanggal Sisa Bayar</label>
@@ -103,12 +102,15 @@
             <input type="text" class="form-control" id="id_sisa" readonly>
         </div>
         <div class="col-12">
-            <button type="submit" class="btn btn-success">Submit</button>
+            <button type="submit" class="btn btn-success">Simpan Perubahan</button>
+            <a href="{% url 'nota:cetak-nota-kosong' %}" class="btn btn-secondary">Kembali</a>
         </div>
     </form>
 </div>
 
 <script>
+let editingItemId = null;
+
 function updateQuantity(id, change) {
     fetch(`/nota/update_quantity/${id}/`, {
         method: 'POST',
@@ -129,8 +131,27 @@ function updateQuantity(id, change) {
 }
 
 function editItem(id) {
-    // Redirect to edit page or open modal
-    window.location.href = `/nota/edit/${id}/`;
+    const row = document.querySelector(`tr[data-id="${id}"]`);
+    if (row) {
+        document.getElementById('id_kode_barang').value = row.dataset.kode;
+        document.getElementById('id_nama_barang').value = row.dataset.nama;
+        document.getElementById('id_deskripsi').value = row.dataset.deskripsi;
+        document.getElementById('id_jumlah_barang').value = row.dataset.jumlah;
+        document.getElementById('id_harga').value = row.dataset.harga;
+        document.getElementById('item_id').value = id;
+        document.getElementById('submit-btn').textContent = 'Update';
+        document.getElementById('submit-btn').name = 'update_item';
+        editingItemId = id;
+        document.getElementById('item-form').scrollIntoView();
+    }
+}
+
+function cancelEdit() {
+    document.getElementById('item-form').reset();
+    document.getElementById('item_id').value = '';
+    document.getElementById('submit-btn').textContent = '+ Tambah';
+    document.getElementById('submit-btn').name = 'add_item';
+    editingItemId = null;
 }
 
 function deleteItem(id) {
@@ -171,75 +192,5 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTotal();
     document.getElementById('id_dp').addEventListener('input', updateSisa);
 });
-
-// Add Customer Modal JavaScript
-function addCustomer() {
-    const formData = new FormData(document.getElementById('customerForm'));
-    fetch('/nota/add_customer/', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Add new option to select
-            const select = document.getElementById('id_customer');
-            const option = new Option(data.customer_name, data.customer_id);
-            select.add(option);
-            select.value = data.customer_id;
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerModal'));
-            modal.hide();
-            // Reset form
-            document.getElementById('customerForm').reset();
-        } else {
-            // Handle errors
-            alert('Error: ' + JSON.stringify(data.errors));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
 </script>
-
-<!-- Add Customer Modal -->
-<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addCustomerModalLabel">Tambah Pelanggan Baru</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="customerForm">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="id_nama" class="form-label">Nama Pelanggan</label>
-                        <input type="text" class="form-control" id="id_nama" name="nama" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_alamat_customer" class="form-label">Alamat</label>
-                        <textarea class="form-control" id="id_alamat_customer" name="alamat_customer" rows="2"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_no_telpon_customer" class="form-label">No. Telepon</label>
-                        <input type="text" class="form-control" id="id_no_telpon_customer" name="no_telpon_customer">
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_shipping_agent" class="form-label">Shipping Agent</label>
-                        <input type="text" class="form-control" id="id_shipping_agent" name="shipping_agent">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" onclick="addCustomer()">Simpan</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

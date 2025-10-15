@@ -3,7 +3,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib import messages
-from .models import Produk, Transaksi, DetailTransaksi, Customer
+from .models import Produk, Transaksi, DetailTransaksi, Customer, InformasiToko
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Sum, Max
 from decimal import Decimal
@@ -211,10 +211,12 @@ def halaman_struk(request, transaksi_id):
     transaksi = get_object_or_404(Transaksi, id=transaksi_id)
     details = DetailTransaksi.objects.filter(transaksi=transaksi)
     total = details.aggregate(Sum('subtotal'))['subtotal__sum'] or 0
+    informasi_toko = InformasiToko.objects.first()
     return render(request, 'struk.html', {
         'transaksi': transaksi,
         'details': details,
-        'total': total
+        'total': total,
+        'informasi_toko': informasi_toko
     })
 
 
