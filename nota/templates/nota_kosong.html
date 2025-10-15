@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="" style="margin-left: 20px; margin-right: 20px;">
-    <h3>Isi Barang sebagai Nota Kosong</h3>
+    {% if messages %}
+        <div class="alert alert-danger">
+            {% for message in messages %}
+            {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h5>Isi Barang Nota Kosong</h5>
 
     <form method="POST" enctype="multipart/form-data" class="row g-3">
         {% csrf_token %}
@@ -63,7 +70,6 @@
         </tbody>
     </table>
 
-    {% if daftar_barang %}
     <hr>
     <h4>Pembayaran</h4>
     <form method="POST" id="payment-form" class="row g-3">
@@ -97,7 +103,6 @@
             <button type="submit" class="btn btn-success">Submit</button>
         </div>
     </form>
-    {% endif %}
 </div>
 
 <script>

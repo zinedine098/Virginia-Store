@@ -1,4 +1,103 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>cetak nota kosong</h1>
+{% csrf_token %}
+<div class="" style="margin-left: 20px; margin-right: 20px;">
+    <h1>Daftar Nota Kosong</h1>
+
+    <table class="table table-bordered table-striped mt-3">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Waktu Transaksi</th>
+                <th>Pelanggan</th>
+                <th>Metode Bayar</th>
+                <th>Total Bayar</th>
+                <th>DP</th>
+                <th>Sisa Bayar</th>
+                <th>Tanggal Sisa Bayar</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nota in notas %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ nota.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ nota.customer.nama }}</td>
+                <td>{{ nota.get_metode_pembayaran_display }}</td>
+                <td>Rp. {{ nota.total_bayar|floatformat:0 }}</td>
+                <td>Rp. {{ nota.dp|floatformat:0 }}</td>
+                <td>Rp. {{ nota.sisa|floatformat:0 }}</td>
+                <td>{{ nota.tanggal_sisa_bayar|date:"d/m/Y" }}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" data-id="{{ nota.id }}" onclick="cetakPdf(this)">Cetak PDF</button>
+                    <button class="btn btn-sm btn-warning" data-id="{{ nota.id }}" onclick="editDp(this)">Edit DP</button>
+                    <button class="btn btn-sm btn-info" data-id="{{ nota.id }}" onclick="editNota(this)">Edit Nota</button>
+                    <button class="btn btn-sm btn-secondary" data-id="{{ nota.id }}" onclick="notaPalsu(this)">Nota Palsu</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="text-center">Belum ada data</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function cetakPdf(button) {
+    const id = button.getAttribute('data-id');
+    window.open('/nota/cetak_pdf/' + id + '/', '_blank');
+}
+
+function editDp(button) {
+    const id = button.getAttribute('data-id');
+    const dp = prompt('Masukkan DP baru:');
+    if (dp !== null) {
+        fetch('/nota/edit_dp/' + id + '/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: 'dp=' + dp
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        });
+    }
+}
+
+function editNota(button) {
+    const id = button.getAttribute('data-id');
+    window.location.href = '/nota/edit_nota/' + id + '/';
+}
+
+function notaPalsu(button) {
+    const id = button.getAttribute('data-id');
+    const potongan = prompt('Masukkan potongan persen:');
+    if (potongan !== null) {
+        fetch('/nota/nota_palsu/' + id + '/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: 'potongan=' + potongan
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        });
+    }
+}
+</script>
 {% endblock %}

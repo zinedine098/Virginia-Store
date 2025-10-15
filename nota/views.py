@@ -121,4 +121,41 @@ def delete_item(request, item_id):
     return JsonResponse({'success': False})
 
 def cetak_nota_kosong(request):
-    return render(request, 'cetak_nota_kosong.html')
+    notas = NotaPayment.objects.all().order_by('-created_at')
+    return render(request, 'cetak_nota_kosong.html', {'notas': notas})
+
+def edit_dp(request, nota_id):
+    if request.method == 'POST':
+        dp = request.POST.get('dp')
+        try:
+            nota = NotaPayment.objects.get(id=nota_id)
+            nota.dp = dp
+            nota.sisa = nota.total_bayar - Decimal(dp)
+            nota.save()
+            return JsonResponse({'success': True})
+        except NotaPayment.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Nota not found'})
+    return JsonResponse({'success': False})
+
+def edit_nota(request, nota_id):
+    # Implement edit nota functionality
+    return JsonResponse({'success': True, 'message': 'Edit nota functionality'})
+
+def cetak_pdf(request, nota_id):
+    # Implement cetak PDF functionality
+    return JsonResponse({'success': True, 'message': 'Cetak PDF functionality'})
+
+def nota_palsu(request, nota_id):
+    if request.method == 'POST':
+        potongan = request.POST.get('potongan')
+        try:
+            nota = NotaPayment.objects.get(id=nota_id)
+            # Apply potongan to total_bayar or sisa
+            # For example, reduce sisa by potongan percent
+            potongan_decimal = Decimal(potongan) / 100
+            nota.sisa = nota.sisa * (1 - potongan_decimal)
+            nota.save()
+            return JsonResponse({'success': True})
+        except NotaPayment.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Nota not found'})
+    return JsonResponse({'success': False})

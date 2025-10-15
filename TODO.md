@@ -1,18 +1,8 @@
-# TODO: Fix Cashier App Issues
-
-## Issue 1: Product Image Not Showing in Modal for Barcode Input
-- [x] Add image element to modal in home.html
-- [x] Modify bukaDetail function to accept and display image URL
-- [x] Update cariProdukByBarcode to pass image URL to bukaDetail
-
-## Issue 2: Cart Updates Require Reload in Both Modes
-- [x] Make cart functions mode-aware (detect current visible table: #tabelKeranjang or #tabelKeranjangBarcode)
-- [x] Update tambahKeranjang to update correct table
-- [x] Update updateJumlah to update correct table
-- [x] Update hapusItem to update correct table
-- [x] Update loadKeranjang to be mode-aware or unify with loadKeranjangBarcode
-- [x] Ensure calculateTotal and calculateTotalBarcode are called correctly
-
-## Testing
-- [ ] Test card mode: add/update/remove items, check immediate updates
-- [ ] Test barcode mode: input barcode, check image in modal, add/update/remove items, check immediate updates
+- [x] Update header in struk.html to include logo and "Virginia" title side by side
+- [x] Add contact information section below header (left: address/factory/phone/mobile/email, right: date/customer)
+- [x] Modify product table to include columns: Barcode, Image, Item Name, Qty, Price, Amount
+- [x] Add a summary table below product table with Total Qty and Total Amount
+- [x] Retain existing total, paid, change table
+- [x] Adjust styling for better alignment and monospace font
+- [ ] Verify the layout matches the PDF description
+- [ ] Test printing functionality
