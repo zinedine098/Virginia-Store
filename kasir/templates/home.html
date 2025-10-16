@@ -15,9 +15,9 @@
 
   /* ================== STYLING PRODUK CARD ================== */
   .product-card {
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--bg-secondary);
-    color: var(--text-primary);
+    background-color: #e9ecef;
+    border: 1px solid #f8f9fa;
+    color: #212529;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     cursor: pointer;
     height: 100%;
@@ -27,7 +27,7 @@
   .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-    border-color: var(--accent-color);
+    border-color: #007bff;
   }
   .product-card .card-img-top {
     border-top-left-radius: calc(0.375rem - 1px);
@@ -42,43 +42,43 @@
   .product-card .card-title {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: #212529;
     margin-bottom: 0.5rem;
   }
   .product-card .price {
     font-weight: 700;
     font-size: 1.1rem;
-    color: var(--accent-color);
+    color: #007bff;
     margin: 0;
   }
   .product-card .stock {
     font-size: 0.85rem;
-    color: var(--text-secondary);
+    color: #6c757d;
     margin: 0;
   }
 
   /* ================== STYLING MODE TOGGLE ================== */
   .mode-toggle-container {
-    background-color: var(--bg-tertiary);
+    background-color: #e9ecef;
     border-radius: 8px;
     padding: 5px;
     display: inline-block;
-    border: 1px solid var(--bg-secondary);
+    border: 1px solid #f8f9fa;
   }
   .mode-toggle-container .btn {
     border: none;
     font-weight: 500;
   }
   .mode-toggle-container .btn-primary {
-    background-color: var(--accent-color);
+    background-color: #007bff;
   }
   .mode-toggle-container .btn-secondary {
     background-color: transparent;
-    color: var(--text-secondary);
+    color: #6c757d;
   }
   .mode-toggle-container .btn-secondary:hover {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
+    background-color: #f8f9fa;
+    color: #212529;
   }
 
   /* ================== STYLING BARCODE MODE ================== */
@@ -87,8 +87,8 @@
     margin: 40px 0;
   }
   .barcode-form-container .card {
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--bg-secondary);
+    background-color: #e9ecef;
+    border: 1px solid #f8f9fa;
   }
   .barcode-form-container .form-control {
     font-size: 1.1rem;
@@ -102,8 +102,8 @@
     top: 0;
     height: 100vh;
     width: 380px;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
+    background-color: #ffffff;
+    color: #212529;
     display: flex;
     flex-direction: column;
     flex-shrink: 0; /* Mencegah sidebar menyusut */
@@ -113,8 +113,8 @@
   }
   .cart-header {
     padding: 15px 20px;
-    background-color: var(--bg-secondary);
-    border-bottom: 1px solid var(--bg-tertiary);
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
     flex-shrink: 0;
   }
   .cart-header h5 {
@@ -128,21 +128,21 @@
     padding: 10px;
   }
   .cart-items::-webkit-scrollbar { width: 8px; }
-  .cart-items::-webkit-scrollbar-track { background: var(--bg-primary); }
-  .cart-items::-webkit-scrollbar-thumb { background-color: var(--bg-tertiary); border-radius: 4px; }
+  .cart-items::-webkit-scrollbar-track { background: #ffffff; }
+  .cart-items::-webkit-scrollbar-thumb { background-color: #e9ecef; border-radius: 4px; }
   .empty-cart {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: var(--text-muted);
+    color: #6c757d;
     padding: 20px;
     text-align: center;
   }
   .empty-cart i { font-size: 3rem; margin-bottom: 15px; }
   .cart-item {
-    background-color: var(--bg-tertiary);
+    background-color: #e9ecef;
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 10px;
@@ -166,7 +166,7 @@
     text-overflow: ellipsis;
     max-width: 70%;
   }
-  .cart-item-price { color: var(--text-secondary); font-size: 0.9rem; }
+  .cart-item-price { color: #6c757d; font-size: 0.9rem; }
   .cart-item-details {
     display: flex;
     justify-content: space-between;
@@ -175,13 +175,13 @@
   .quantity-control {
     display: flex;
     align-items: center;
-    background-color: var(--bg-secondary);
+    background-color: #f8f9fa;
     border-radius: 5px;
   }
   .quantity-btn {
     background-color: transparent;
     border: none;
-    color: var(--text-primary);
+    color: #212529;
     width: 28px;
     height: 28px;
     display: flex;
@@ -191,7 +191,7 @@
     border-radius: 5px;
     transition: background-color 0.2s;
   }
-  .quantity-btn:hover { background-color: var(--bg-primary); }
+  .quantity-btn:hover { background-color: #ffffff; }
   .quantity-value {
     margin: 0 12px;
     font-weight: 500;
@@ -200,11 +200,11 @@
   }
   .cart-item-subtotal {
     font-weight: 600;
-    color: var(--accent-color);
+    color: #007bff;
     margin-right: 10px;
   }
   .delete-btn {
-    background-color: var(--danger-color);
+    background-color: #dc3545;
     border: none;
     color: white;
     width: 30px;
@@ -219,37 +219,37 @@
   .delete-btn:hover { background-color: #c0392b; }
   .cart-footer {
     padding: 15px 20px;
-    background-color: var(--bg-secondary);
-    border-top: 1px solid var(--bg-tertiary);
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
     flex-shrink: 0;
   }
   .cart-total h5 { margin: 0; font-weight: 600; }
-  .cart-footer .btn-success {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
+  /* .cart-footer .btn-success {
+    background-color: #007bff;
+    border-color: #007bff;
     font-weight: 600;
     padding: 10px;
     font-size: 1rem;
     transition: background-color 0.2s;
-  }
-  .cart-footer .btn-success:hover { background-color: var(--accent-hover); border-color: var(--accent-hover); }
+  } */
+  .cart-footer .btn-success:hover { background-color: #0056b3; border-color: #0056b3; }
 
   /* ================== STYLING MODAL ================== */
   .modal-content {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--bg-secondary);
+    background-color: #e9ecef;
+    color: #212529;
+    border: 1px solid #f8f9fa;
   }
   .modal-header {
-    background-color: var(--bg-secondary);
-    border-bottom: 1px solid var(--bg-primary);
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ffffff;
   }
   .modal-header .btn-close {
     filter: invert(1) grayscale(100%) brightness(200%);
   }
   .modal-footer {
-    background-color: var(--bg-secondary);
-    border-top: 1px solid var(--bg-primary);
+    background-color: #f8f9fa;
+    border-top: 1px solid #ffffff;
   }
 
   /* ================== RESPONSIVE ================== */
