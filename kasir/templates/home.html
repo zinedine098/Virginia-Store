@@ -303,7 +303,7 @@
               <h6 class="card-title">{{ item.nama_barang }}</h6>
               <div>
                 <p class="price" id="hitam">Rp. {{ item.harga_barang|floatformat:0|intcomma }}</p>
-                <p class="stock">Stok: <span id="stok-{{ item.id }}">{{ item.stok }}</span></p>
+                <p class="stock">Stok: <span id="stok-{{ item.id }}">{{ item.stok|floatformat:0|intcomma }}</span></p>
               </div>
             </div>
           </div>
