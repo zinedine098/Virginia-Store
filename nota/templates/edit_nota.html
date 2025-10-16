@@ -170,21 +170,22 @@ function deleteItem(id) {
     }
 }
 
+let totalAmount = 0;
+
 function updateTotal() {
     let total = 0;
     document.querySelectorAll('[id^="subtotal-"]').forEach(el => {
         const subtotal = parseFloat(el.textContent.replace(/[^\d]/g, '')) || 0;
         total += subtotal;
     });
+    totalAmount = total;
     document.getElementById('id_total_bayar').value = `Rp. ${total.toLocaleString('id-ID')}`;
     updateSisa();
 }
 
 function updateSisa() {
-    const totalText = document.getElementById('id_total_bayar').value;
-    const total = parseFloat(totalText.replace(/[^\d]/g, '')) || 0;
     const dp = parseFloat(document.getElementById('id_dp').value) || 0;
-    const sisa = total - dp;
+    const sisa = totalAmount - dp;
     document.getElementById('id_sisa').value = `Rp. ${sisa.toLocaleString('id-ID')}`;
 }
 

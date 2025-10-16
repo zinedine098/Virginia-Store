@@ -76,7 +76,6 @@
 
 <!-- Modal Struk -->
 <div class="modal fade" id="strukModal" tabindex="-1" aria-labelledby="strukModalLabel" aria-hidden="true" data-bs-backdrop="false">
-  <div class="p-3" style="background-color: #d8d8d8;">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-body">
@@ -113,7 +112,7 @@
                 </div>
                 <div class="col-4 text-end" id="hitam">
                   <p class="m-0"><strong>DATE</strong> : 15 October 2025</p>
-                  <p class="m-0"><strong>CUSTOMER</strong> : {% if transaksi.customer %}{{ transaksi.customer.nama }}{% else %}-{% endif %}</p>
+                  <p class="m-0"><strong>CUSTOMER</strong> : {% if transaksi.customer %}{{ transaksi.customer.nama }}{% else %}Umum{% endif %}</p>
                 </div>
               </div>
 
@@ -163,8 +162,7 @@
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="window.location.href='{% url 'halaman_kasir' %}'">Kembali ke Kasir</button>
         </div>
       </div>
-    </div>
-  </div>
+</div>
 </div>
 
 <!-- CSS -->
@@ -172,15 +170,18 @@
 #hitam {
   color: black;
 }
-
-.struk-container {
-  width: 100%;
-  max-width: 900px;
-  /* border: 1px solid #000; */
-  padding: 10px;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #fff;
-}
+/* Inilah bagian struk utama */
+  .struk-container {
+    background-color: #fff !important;
+    color: #000 !important;
+    width: 100% !important;
+    max-width: 900px;
+    border: none !important; /* 🚫 hilangkan border pembungkus */
+    /* padding: 5mm !important; beri sedikit ruang agar tidak menempel di pinggir */
+    margin: 0 auto !important; /* posisi tengah */
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 10px;
+  }
 
 .logo-img {
   width: 80px;
@@ -224,10 +225,12 @@ hr {
 }
 
 .modal-backdrop {
-  display: none !important;
+  display: block !important;
+  opacity: 0.5 !important;
+  background-color: #000 !important;
 }
 .modal.show {
-  background-color: rgba(211, 211, 211, 0.301) !important;
+  background-color: rgba(54, 54, 54, 0.788) !important;
 }
 
 
@@ -269,15 +272,7 @@ hr {
     display: none !important; /* Sembunyikan tombol saat print */
   }
 
-  /* Inilah bagian struk utama */
-  .struk-container {
-    background-color: #fff !important;
-    color: #000 !important;
-    width: 100% !important;
-    border: none !important; /* 🚫 hilangkan border pembungkus */
-    padding: 5mm !important; /* beri sedikit ruang agar tidak menempel di pinggir */
-    margin: 0 auto !important; /* posisi tengah */
-  }
+  
 
   /* Pastikan tabel rapi tanpa gangguan */
   table {
@@ -308,9 +303,6 @@ hr {
 
 @page {
   margin: 10 !important;
-}
-.struk-container {
-  padding: 10 !important;
 }
 </style>
 

@@ -71,7 +71,7 @@
     </table>
 
     <hr>
-    <h4>Pembayaran</h4>
+    <!-- <h4>Pembayaran</h4>
     <form method="POST" id="payment-form" class="row g-3">
         {% csrf_token %}
         <input type="hidden" name="submit_payment" value="1">
@@ -105,7 +105,59 @@
         <div class="col-12">
             <button type="submit" class="btn btn-success">Submit</button>
         </div>
-    </form>
+    </form> -->
+<h4 class="mb-3">Pembayaran</h4>
+<form method="POST" id="payment-form">
+    {% csrf_token %}
+    <input type="hidden" name="submit_payment" value="1">
+
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <tbody>
+                <tr>
+                    <th style="width: 30%;">Pelanggan</th>
+                    <td style="width: 70%;">
+                        <div class="input-group">
+                            {{ payment_form.customer }}
+                            <button type="button" class="btn btn-outline-primary" 
+                                data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+                                Tambah
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Tanggal Sisa Bayar</th>
+                    <td>{{ payment_form.tanggal_sisa_bayar }}</td>
+                </tr>
+                <tr>
+                    <th>Metode Bayar</th>
+                    <td>{{ payment_form.metode_pembayaran }}</td>
+                </tr>
+                <tr>
+                    <th>Total</th>
+                    <td><strong id="total_display">Rp. {{ total|floatformat:0 }}</strong></td>
+                </tr>
+                <tr>
+                    <th>DP</th>
+                    <td>{{ payment_form.dp }}</td>
+                </tr>
+                <tr>
+                    <th>Sisa Pembayaran</th>
+                    <td><strong id="id_sisa">Rp. 0</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-end mt-3">
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-credit-card"></i> PEMBAYARAN PESAN
+        </button>
+    </div>
+</form>
+
+
 </div>
 
 <script>
@@ -149,22 +201,23 @@ function deleteItem(id) {
     }
 }
 
+let totalAmount = 0;
+
 function updateTotal() {
     let total = 0;
     document.querySelectorAll('[id^="subtotal-"]').forEach(el => {
         const subtotal = parseFloat(el.textContent.replace(/[^\d]/g, '')) || 0;
         total += subtotal;
     });
-    document.getElementById('id_total_bayar').value = `Rp. ${total.toLocaleString('id-ID')}`;
+    totalAmount = total;
+    document.getElementById('total_display').textContent = `Rp. ${total.toLocaleString('id-ID')}`;
     updateSisa();
 }
 
 function updateSisa() {
-    const totalText = document.getElementById('id_total_bayar').value;
-    const total = parseFloat(totalText.replace(/[^\d]/g, '')) || 0;
     const dp = parseFloat(document.getElementById('id_dp').value) || 0;
-    const sisa = total - dp;
-    document.getElementById('id_sisa').value = `Rp. ${sisa.toLocaleString('id-ID')}`;
+    const sisa = totalAmount - dp;
+    document.getElementById('id_sisa').textContent = `Rp. ${sisa.toLocaleString('id-ID')}`;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
