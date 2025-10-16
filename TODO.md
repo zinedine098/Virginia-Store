@@ -1,5 +1,5 @@
-# TODO List for Modifying Bayar Button to Show Receipt Modal
-
-- [x] Edit kasir/views.py: Modify proses_bayar to render bayar.html with additional context (transaksi, details, total, informasi_toko, show_modal=True) after saving transaction.
-- [x] Edit kasir/templates/bayar.html: Add Bootstrap modal with receipt content, conditional show via JavaScript, update print button for modal only, change back button to close modal and redirect.
-- [ ] Test: Run server, perform transaction, verify modal appears, print works for modal, back button closes modal and redirects.
+- [ ] Update cetak_nota_kosong.html: Add Bootstrap modal HTML with form fields (total transaksi readonly, tanggal sisa pembayaran input, jumlah DP input, sisa transaksi display)
+- [ ] Update cetak_nota_kosong.html: Add data attributes to table row for nota data (total_bayar, dp, sisa, tanggal_sisa_bayar)
+- [ ] Update cetak_nota_kosong.html: Modify editDp function to populate modal with data, handle real-time sisa calculation on DP input, and submit form via fetch
+- [ ] Update views.py edit_dp: Modify to accept tanggal_sisa_bayar from POST and update the nota accordingly
+- [ ] Test the functionality: Click Edit DP, input values, check real-time sisa update, submit and verify backend update

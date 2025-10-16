@@ -128,9 +128,11 @@ def cetak_nota_kosong(request):
 def edit_dp(request, nota_id):
     if request.method == 'POST':
         dp = request.POST.get('dp')
+        tanggal_sisa_bayar = request.POST.get('tanggal_sisa_bayar')
         try:
             nota = NotaPayment.objects.get(id=nota_id)
             nota.dp = dp
+            nota.tanggal_sisa_bayar = tanggal_sisa_bayar
             nota.sisa = nota.total_bayar - Decimal(dp)
             nota.save()
             return JsonResponse({'success': True})

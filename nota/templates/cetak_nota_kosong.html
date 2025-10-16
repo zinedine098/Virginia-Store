@@ -18,7 +18,7 @@
         </thead>
         <tbody>
             {% for nota in notas %}
-            <tr>
+            <tr data-id="{{ nota.id }}" data-total="{{ nota.total_bayar }}" data-dp="{{ nota.dp }}" data-sisa="{{ nota.sisa }}" data-tanggal="{{ nota.tanggal_sisa_bayar|date:'Y-m-d' }}">
                 <td>{{ forloop.counter }}</td>
                 <td>{{ nota.created_at|date:"d/m/Y H:i" }}</td>
                 <td>{{ nota.customer.nama }}</td>
@@ -41,34 +41,100 @@
     </table>
 </div>
 
+<!-- Modal for Edit DP -->
+<div class="modal fade" id="editDpModal" tabindex="-1" aria-labelledby="editDpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editDpModalLabel">Edit DP</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editDpForm">
+                    <div class="mb-3">
+                        <label for="totalTransaksi" class="form-label">Total Transaksi</label>
+                        <input type="text" class="form-control" id="totalTransaksi" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tanggalSisaBayar" class="form-label">Tanggal Sisa Pembayaran</label>
+                        <input type="date" class="form-control" id="tanggalSisaBayar" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jumlahDp" class="form-label">Jumlah DP</label>
+                        <input type="text" class="form-control" id="jumlahDp" data-currency="true" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sisaTransaksi" class="form-label">Sisa Transaksi</label>
+                        <input type="text" class="form-control" id="sisaTransaksi" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="saveDpBtn">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function cetakPdf(button) {
     const id = button.getAttribute('data-id');
     window.open('/nota/cetak_pdf/' + id + '/', '_blank');
 }
 
+let currentNotaId = null;
+
 function editDp(button) {
-    const id = button.getAttribute('data-id');
-    const dp = prompt('Masukkan DP baru:');
-    if (dp !== null) {
-        fetch('/nota/edit_dp/' + id + '/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-            body: 'dp=' + dp
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + data.error);
-            }
-        });
-    }
+    const row = button.closest('tr');
+    currentNotaId = row.getAttribute('data-id');
+    const total = parseFloat(row.getAttribute('data-total'));
+    const dp = parseFloat(row.getAttribute('data-dp'));
+    const tanggal = row.getAttribute('data-tanggal');
+
+    // Populate modal
+    document.getElementById('totalTransaksi').value = formatCurrency(total.toString());
+    document.getElementById('tanggalSisaBayar').value = tanggal;
+    document.getElementById('jumlahDp').value = formatCurrency(dp.toString());
+    updateSisaTransaksi();
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('editDpModal'));
+    modal.show();
 }
+
+function updateSisaTransaksi() {
+    const total = unformatCurrency(document.getElementById('totalTransaksi').value);
+    const dp = unformatCurrency(document.getElementById('jumlahDp').value);
+    const sisa = total - dp;
+    document.getElementById('sisaTransaksi').value = formatCurrency(sisa.toString());
+}
+
+// Event listener for DP input
+document.getElementById('jumlahDp').addEventListener('input', updateSisaTransaksi);
+
+// Save button event
+document.getElementById('saveDpBtn').addEventListener('click', function() {
+    const tanggal = document.getElementById('tanggalSisaBayar').value;
+    const dp = unformatCurrency(document.getElementById('jumlahDp').value);
+
+    fetch('/nota/edit_dp/' + currentNotaId + '/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: 'dp=' + dp + '&tanggal_sisa_bayar=' + tanggal
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+});
 
 function editNota(button) {
     const id = button.getAttribute('data-id');
