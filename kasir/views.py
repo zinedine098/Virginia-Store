@@ -203,7 +203,18 @@ def proses_bayar(request):
         del request.session['current_transaksi_id']
         messages.success(request, "Transaksi berhasil!")
 
-        return redirect('halaman_struk', transaksi_id=transaksi.id)
+        # Fetch informasi_toko for receipt
+        informasi_toko = InformasiToko.objects.first()
+
+        # Render bayar.html with receipt data and show_modal flag
+        return render(request, 'bayar.html', {
+            'transaksi': transaksi,
+            'details': details,
+            'total': total,
+            'customers': Customer.objects.all(),  # Keep customers for form
+            'informasi_toko': informasi_toko,
+            'show_modal': True
+        })
     return redirect('halaman_kasir')
 
 

@@ -74,6 +74,246 @@
   </div>
 </div>
 
+<!-- Modal Struk -->
+<div class="modal fade" id="strukModal" tabindex="-1" aria-labelledby="strukModalLabel" aria-hidden="true" data-bs-backdrop="false">
+  <div class="p-3" style="background-color: #d8d8d8;">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-body">
+            <div class="struk-container mx-auto" id="struk-cetak">
+              <!-- Header Atas -->
+              <div class="d-flex justify-content-between align-items-start" id="hitam">
+                <div>
+                  <p class="small m-0">{{ transaksi.tanggal|date:"d/m/y, H:i A" }}</p>
+                  <p class="small m-0" id="hitam">Virginia | Halaman Kasir</p>
+                </div>
+                <div class="text-end">
+                  <p class="small m-0 fw-bold" id="hitam">INVOICE{{ transaksi.kode_nota|default:"120026" }}</p>
+                </div>
+              </div>
+
+              <hr class="my-1">
+
+              <!-- Bagian Logo dan Nama -->
+              <div class="d-flex align-items-center">
+                <img src="{% static 'image/logo.png' %}" alt="Logo" class="logo-img me-2">
+                <div>
+                  <h3 class="m-0 fw-bold" id="hitam">VIRGINIA</h3>
+                </div>
+              </div>
+
+              <!-- Informasi Toko -->
+              <div class="row mt-2">
+                <div class="col-8">
+                  <p class="m-0" id="hitam"><strong>ADDRESS</strong> : {{ informasi_toko.address|default:"Jl. Raya Legian kelod No. 393 KUTA - BALI" }}</p>
+                  <p class="m-0" id="hitam"><strong>FACTORY</strong> : {{ informasi_toko.factory|default:"Jl. Raya Tuban Gg. Danasari No.16 Y KUTA-BALI-INDONESIA, 80361" }}</p>
+                  <p class="m-0" id="hitam"><strong>PHONE</strong> : {{ informasi_toko.phone|default:"(+62) 87862223989, (+62) 81236060500" }}</p>
+                  <p class="m-0" id="hitam"><strong>MOBILE</strong> : {{ informasi_toko.mobile|default:"(+62) 8124656880" }}</p>
+                  <p class="m-0" id="hitam"><strong>EMAIL</strong> : {{ informasi_toko.email|default:"harrykweel@hotmail.com" }}</p>
+                </div>
+                <div class="col-4 text-end" id="hitam">
+                  <p class="m-0"><strong>DATE</strong> : 15 October 2025</p>
+                  <p class="m-0"><strong>CUSTOMER</strong> : {% if transaksi.customer %}{{ transaksi.customer.nama }}{% else %}-{% endif %}</p>
+                </div>
+              </div>
+
+              <!-- Tabel Produk -->
+              <table class="table table-bordered mt-3 text-center align-middle">
+                <thead>
+                  <tr>
+                    <th>BARCODE</th>
+                    <th>PICTURES</th>
+                    <th>ITEM NAME</th>
+                    <th>QTY</th>
+                    <th>PRICE</th>
+                    <th>AMOUNT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for detail in details %}
+                  <tr>
+                    <td>{{ detail.produk.barcode }}</td>
+                    <td>
+                      {% if detail.produk.gambar %}
+                        <img src="{{ detail.produk.gambar.url }}" class="foto-produk">
+                      {% else %}
+                        <span>-</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ detail.produk.nama_barang }}</td>
+                    <td>{{ detail.jumlah }}</td>
+                    <td>Rp. {{ detail.produk.harga_barang|floatformat:0 }}</td>
+                    <td>Rp. {{ detail.subtotal|floatformat:0 }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+
+              <!-- Bagian Total -->
+              <table class="table table-bordered text-end">
+                <tr>
+                  <td><strong>TOTAL</strong></td>
+                  <td style="width: 120px;"><strong>Rp. {{ total|floatformat:0 }}</strong></td>
+                </tr>
+              </table>
+            </div>
+        </div>
+        <div class="modal-footer d-print-none">
+          <button type="button" class="btn btn-primary" onclick="printModal()">Cetak Struk</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="window.location.href='{% url 'halaman_kasir' %}'">Kembali ke Kasir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CSS -->
+<style>
+#hitam {
+  color: black;
+}
+
+.struk-container {
+  width: 100%;
+  max-width: 900px;
+  /* border: 1px solid #000; */
+  padding: 10px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #fff;
+}
+
+.logo-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.table {
+  font-size: 14px;
+  border-color: #000;
+  --bs-table-color: black;
+  --bs-table-bg: #fff;
+}
+
+.table th, .table td {
+  border: 1px solid #000 !important;
+  padding: 4px;
+  color: black !important;
+  background-color: #fff !important;
+}
+
+.table thead th {
+  color: black !important;
+  background-color: #fff !important;
+}
+
+.table tbody td {
+  color: black !important;
+  background-color: #fff !important;
+}
+
+.foto-produk {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #000;
+}
+
+.modal-backdrop {
+  display: none !important;
+}
+.modal.show {
+  background-color: rgba(211, 211, 211, 0.301) !important;
+}
+
+
+@media print {
+  /* Hanya tampilkan isi struk */
+  body * {
+    visibility: hidden !important;
+  }
+
+  #strukModal,
+  #strukModal * {
+    visibility: visible !important;
+  }
+
+  #strukModal {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    background-color: #fff !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .modal-dialog {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .modal-content {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .modal-footer {
+    display: none !important; /* Sembunyikan tombol saat print */
+  }
+
+  /* Inilah bagian struk utama */
+  .struk-container {
+    background-color: #fff !important;
+    color: #000 !important;
+    width: 100% !important;
+    border: none !important; /* 🚫 hilangkan border pembungkus */
+    padding: 5mm !important; /* beri sedikit ruang agar tidak menempel di pinggir */
+    margin: 0 auto !important; /* posisi tengah */
+  }
+
+  /* Pastikan tabel rapi tanpa gangguan */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+  }
+
+  th, td {
+    border: 1px solid #000 !important;
+    padding: 4px !important;
+  }
+
+  img {
+    max-width: 100px !important;
+  }
+
+  /* Hilangkan margin default halaman print browser */
+  @page {
+    margin: 5mm !important;
+  }
+}
+
+@page {
+  margin: 10 !important;
+}
+.struk-container {
+  padding: 10 !important;
+}
+</style>
+
 <script>
 document.getElementById('amount_paid').addEventListener('input', function() {
   const total = parseFloat(document.getElementById('total').value) || 0;
@@ -81,5 +321,20 @@ document.getElementById('amount_paid').addEventListener('input', function() {
   const change = paid - total;
   document.getElementById('change').value = change.toFixed(2);
 });
+
+{% if show_modal %}
+document.addEventListener('DOMContentLoaded', function() {
+  var myModal = new bootstrap.Modal(document.getElementById('strukModal'), {
+    keyboard: false
+  });
+  myModal.show();
+});
+{% endif %}
+
+function printModal() {
+  setTimeout(() => {
+    window.print();
+  }, 300);
+}
 </script>
 {% endblock %}
