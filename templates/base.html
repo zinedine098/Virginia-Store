@@ -17,7 +17,7 @@
 
     <style>
         body {
-            background-color: #ff7979;
+            background: linear-gradient(to left, yellow, #14173a);
         }
         .navbar-custom {
             background-color: #ffffff !important;
@@ -88,5 +88,78 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <!-- Global Currency Formatting Script -->
+    <script>
+        // Function to format number as currency (ID locale with dot separator)
+        function formatCurrency(value) {
+            if (!value) return '';
+            // Remove existing dots and commas
+            let num = value.toString().replace(/[.,]/g, '');
+            // Format with dots
+            return num.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        // Function to unformat currency string to number
+        function unformatCurrency(value) {
+            if (!value) return '';
+            return value.toString().replace(/\./g, '');
+        }
+
+        // Function to apply formatting to input on input event
+        function applyCurrencyFormat(input) {
+            let value = input.value;
+            let cursorPos = input.selectionStart;
+            let beforeCursor = value.substring(0, cursorPos);
+            let afterCursor = value.substring(cursorPos);
+
+            // Remove formatting from current value
+            let rawValue = unformatCurrency(value);
+
+            // Format the raw value
+            let formattedValue = formatCurrency(rawValue);
+
+            // Update input value
+            input.value = formattedValue;
+
+            // Adjust cursor position
+            let newCursorPos = formattedValue.length - (value.length - cursorPos);
+            input.setSelectionRange(newCursorPos, newCursorPos);
+        }
+
+        // Function to initialize currency inputs
+        function initCurrencyInputs() {
+            const currencyInputs = document.querySelectorAll('input[data-currency="true"]');
+            currencyInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    applyCurrencyFormat(this);
+                });
+                // Format initial value if present
+                if (input.value) {
+                    input.value = formatCurrency(unformatCurrency(input.value));
+                }
+            });
+        }
+
+        // Function to unformat all currency inputs before form submit
+        function unformatCurrencyInputs(form) {
+            const currencyInputs = form.querySelectorAll('input[data-currency="true"]');
+            currencyInputs.forEach(input => {
+                input.value = unformatCurrency(input.value);
+            });
+        }
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            initCurrencyInputs();
+
+            // Handle form submits
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function() {
+                    unformatCurrencyInputs(this);
+                });
+            });
+        });
+    </script>
 </body>
 </html>

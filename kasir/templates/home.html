@@ -18,9 +18,10 @@
 
   /* ================== STYLING PRODUK CARD ================== */
   .product-card {
-    background-color: #198754;
-    border: 1px solid #f8f9fa;
+    background-color: #ffffff;
+    /* border: 1px solid #f8f9fa; */
     color: #212529;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     cursor: pointer;
     height: 100%;
@@ -56,7 +57,7 @@
   }
   .product-card .stock {
     font-size: 0.85rem;
-    color: #ffffff;
+    color: #5a5a5a;
     margin: 0;
   }
 
@@ -283,23 +284,13 @@
     </div>
     {% endif %}  
     <!-- Tombol Toggle Mode -->
-    <div class="mb-4">
-      <div class="mode-toggle-container">
-        <!-- <button class="btn btn-primary" onclick="toggleMode('card')">
-          <i class="fas fa-th-large me-2"></i>Pilih Produk
-        </button>
-        <button class="btn btn-secondary" onclick="toggleMode('barcode')">
-          <i class="fas fa-barcode me-2"></i>Input Barcode
-        </button> -->
         <div class="input-group mb-3">
           <span class="input-group-text"><i class="fas fa-barcode"></i></span>
           <input type="text" id="barcodeInput" class="form-control" placeholder="Masukan barcode" onkeypress="if(event.key === 'Enter'){cariProdukByBarcode()}">
-          <button class="btn btn-success" onclick="cariProdukByBarcode()">
+          <button class="btn btn-warning" onclick="cariProdukByBarcode()">
             <i class="fas fa-search me-2"></i>
           </button>
         </div>
-      </div>
-    </div>
 
     <!-- Mode Card -->
     <div id="cardMode">
@@ -311,7 +302,7 @@
             <div class="card-body">
               <h6 class="card-title">{{ item.nama_barang }}</h6>
               <div>
-                <p class="price" id="hitam">Rp. {{ item.harga_barang|floatformat:"0," }}</p>
+                <p class="price" id="hitam">Rp. {{ item.harga_barang|floatformat:0|intcomma }}</p>
                 <p class="stock">Stok: <span id="stok-{{ item.id }}">{{ item.stok }}</span></p>
               </div>
             </div>

@@ -1,163 +1,180 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 {% block content %}
-<div class="" style="margin-left: 20px; margin-right: 20px;">
-    {% if messages %}
-        <div class="alert alert-danger">
-            {% for message in messages %}
-            {{ message }}
-            {% endfor %}
-        </div>
-    {% endif %}
-    <h5>Isi Barang Nota Kosong</h5>
-
-    <form method="POST" enctype="multipart/form-data" class="row g-3">
-        {% csrf_token %}
-        <input type="hidden" name="add_item" value="1">
-        <div class="col-md-4">{{ form.kode_barang }}</div>
-        <div class="col-md-4">{{ form.nama_barang }}</div>
-        <div class="col-md-4">{{ form.deskripsi }}</div>
-        <div class="col-md-4">{{ form.jumlah_barang }}</div>
-        <div class="col-md-4">{{ form.harga }}</div>
-        <div class="col-md-4">{{ form.gambar }}</div>
-        <div class="col-12">
-            <button type="submit" class="btn btn-warning">+ Tambah</button>
-        </div>
-    </form>
-
-    <hr>
-
-    <h4>Keranjang Nota Kosong</h4>
-    <table class="table table-bordered table-striped mt-3">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Kode Barang</th>
-                <th>Gambar Barang</th>
-                <th>Nama Barang</th>
-                <th>Deskripsi</th>
-                <th>Jumlah</th>
-                <th>Harga</th>
-                <th>Subtotal</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for barang in daftar_barang %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ barang.kode_barang }}</td>
-                <td>
-                    {% if barang.gambar %}
-                        <img src="{{ barang.gambar }}" width="60">
-                    {% endif %}
-                </td>
-                <td>{{ barang.nama_barang }}</td>
-                <td>{{ barang.deskripsi }}</td>
-                <td>
-                    <button class="btn btn-sm btn-secondary" onclick="updateQuantity('{{ barang.id }}', -1)">-</button>
-                    <span id="qty-{{ barang.id }}">{{ barang.jumlah_barang }}</span>
-                    <button class="btn btn-sm btn-secondary" onclick="updateQuantity('{{ barang.id }}', 1)">+</button>
-                </td>
-                <td>Rp. <span id="harga-{{ barang.id }}">{{ barang.harga|floatformat:0 }}</span></td>
-                <td>Rp. <span id="subtotal-{{ barang.id }}">{{ barang.subtotal|default:0|floatformat:0 }}</span></td>
-                <td>
-                    <button class="btn btn-sm btn-danger" onclick="deleteItem('{{ barang.id }}')">Delete</button>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="9" class="text-center">Belum ada data</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <hr>
-    <!-- <h4>Pembayaran</h4>
-    <form method="POST" id="payment-form" class="row g-3">
-        {% csrf_token %}
-        <input type="hidden" name="submit_payment" value="1">
-        <div class="col-md-4">
-            <label for="id_customer" class="form-label">Pelanggan</label>
-            <div class="input-group">
-                {{ payment_form.customer }}
-                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCustomerModal">Tambah</button>
+<div class="mx-5 my-5 card my-2">
+    <div class="" style="margin-left: 20px; margin-right: 20px;">
+        {% if messages %}
+            <div class="alert alert-danger">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
             </div>
-        </div>
-        <div class="col-md-4">
-            <label for="id_tanggal_sisa_bayar" class="form-label">Tanggal Sisa Bayar</label>
-            {{ payment_form.tanggal_sisa_bayar }}
-        </div>
-        <div class="col-md-4">
-            <label for="id_metode_pembayaran" class="form-label">Metode Pembayaran</label>
-            {{ payment_form.metode_pembayaran }}
-        </div>
-        <div class="col-md-4">
-            <label for="id_total_bayar" class="form-label">Total Bayar</label>
-            <input type="text" class="form-control" id="id_total_bayar" value="Rp. {{ total|floatformat:0 }}" readonly>
-        </div>
-        <div class="col-md-4">
-            <label for="id_dp" class="form-label">DP</label>
-            {{ payment_form.dp }}
-        </div>
-        <div class="col-md-4">
-            <label for="id_sisa" class="form-label">Sisa yang Harus Dibayar</label>
-            <input type="text" class="form-control" id="id_sisa" readonly>
-        </div>
-        <div class="col-12">
-            <button type="submit" class="btn btn-success">Submit</button>
-        </div>
-    </form> -->
-<h4 class="mb-3">Pembayaran</h4>
-<form method="POST" id="payment-form">
-    {% csrf_token %}
-    <input type="hidden" name="submit_payment" value="1">
+        {% endif %}
+        <div class="card px-3 my-4">
+            <h5 class="my-4">Isi Barang Nota Kosong</h5>
 
-    <div class="table-responsive">
-        <table class="table table-bordered align-middle">
-            <tbody>
+            <form method="POST" enctype="multipart/form-data" class="row g-3">
+                {% csrf_token %}
+                    <input type="hidden" name="add_item" value="1">
+                    <div class="col-md-4">
+                        {{ form.kode_barang }}
+                        <style>
+                            input[name="kode_barang"] {
+                                background-color: #D9D9D9;
+                            }
+                        </style>
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.nama_barang }}
+                        <style>
+                            input[name="nama_barang"] {
+                                background-color: #D9D9D9;
+                            }
+                        </style>
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.deskripsi }}
+                        <style>
+                            textarea[name="deskripsi"] {
+                                background-color: #D9D9D9;
+                            }
+                        </style>
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.jumlah_barang }}
+                        <style>
+                            input[name="jumlah_barang"] {
+                                background-color: #D9D9D9;
+                            }
+                        </style>
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.harga|attr:"data-currency:true" }}
+                        <style>
+                            input[name="harga"] {
+                                background-color: #D9D9D9;
+                            }
+                        </style>
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.gambar }}
+                        <style>
+                            input[name="gambar"] {
+                                background-color: #D9D9D9;
+                            }
+                        </style>
+                    </div>
+                <div class="col-12 my-3">
+                    <button type="submit" class="btn btn-warning">+ Tambah</button>
+                </div>
+            </form>
+        </div>
+        <table class="table table-bordered table-striped mt-3">
+            <thead>
                 <tr>
-                    <th style="width: 30%;">Pelanggan</th>
-                    <td style="width: 70%;">
-                        <div class="input-group">
-                            {{ payment_form.customer }}
-                            <button type="button" class="btn btn-outline-primary" 
-                                data-bs-toggle="modal" data-bs-target="#addCustomerModal">
-                                Tambah
-                            </button>
-                        </div>
+                    <th>No</th>
+                    <th>Kode Barang</th>
+                    <th>Gambar Barang</th>
+                    <th>Nama Barang</th>
+                    <th>Deskripsi</th>
+                    <th>Jumlah</th>
+                    <th>Harga</th>
+                    <th>Subtotal</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for barang in daftar_barang %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ barang.kode_barang }}</td>
+                    <td>
+                        {% if barang.gambar %}
+                            <img src="{{ barang.gambar }}" width="60">
+                        {% endif %}
+                    </td>
+                    <td>{{ barang.nama_barang }}</td>
+                    <td>{{ barang.deskripsi }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="updateQuantity('{{ barang.id }}', -1)">-</button>
+                        <span id="qty-{{ barang.id }}">{{ barang.jumlah_barang }}</span>
+                        <button class="btn btn-sm btn-secondary" onclick="updateQuantity('{{ barang.id }}', 1)">+</button>
+                    </td>
+                    <td>Rp. <span id="harga-{{ barang.id }}">{{ barang.harga|floatformat:0 }}</span></td>
+                    <td>Rp. <span id="subtotal-{{ barang.id }}">{{ barang.subtotal|default:0|floatformat:0 }}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="deleteItem('{{ barang.id }}')">Delete</button>
                     </td>
                 </tr>
-                <tr>
-                    <th>Tanggal Sisa Bayar</th>
-                    <td>{{ payment_form.tanggal_sisa_bayar }}</td>
-                </tr>
-                <tr>
-                    <th>Metode Bayar</th>
-                    <td>{{ payment_form.metode_pembayaran }}</td>
-                </tr>
-                <tr>
-                    <th>Total</th>
-                    <td><strong id="total_display">Rp. {{ total|floatformat:0 }}</strong></td>
-                </tr>
-                <tr>
-                    <th>DP</th>
-                    <td>{{ payment_form.dp }}</td>
-                </tr>
-                <tr>
-                    <th>Sisa Pembayaran</th>
-                    <td><strong id="id_sisa">Rp. 0</strong></td>
-                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="text-center">Belum ada data</td></tr>
+                {% endfor %}
             </tbody>
         </table>
+    <div class="">
+        <form method="POST" id="payment-form">
+            <div class="">
+                {% csrf_token %}
+                <input type="hidden" name="submit_payment" value="1">
+
+                <div class="table-responsive">
+                    <div class="">
+                        <table class="table table-bordered align-middle">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 30%;">Pelanggan</th>
+                                    <td style="width: 70%;">
+                                        <div class="input-group">
+                                            {{ payment_form.customer }}
+                                            <button type="button" class="btn btn-warning" 
+                                                data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+                                                Tambah
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Tanggal Sisa Bayar</th>
+                                    <td>{{ payment_form.tanggal_sisa_bayar }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Metode Bayar</th>
+                                    <td>{{ payment_form.metode_pembayaran }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Total</th>
+                                    <td><strong id="total_display">Rp. {{ total|floatformat:0 }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>DP</th>
+                                    <td>{{ payment_form.dp|attr:"data-currency:true" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Sisa Pembayaran</th>
+                                    <td><strong id="id_sisa">Rp. 0</strong></td>
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <td>
+                                        <div class="text-end mt-3">
+                                            <button type="submit" class="btn btn-warning">
+                                                <i class="bi bi-credit-card"></i> PEMBAYARAN PESAN
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                
+            </div>
+        </form>
     </div>
 
-    <div class="text-end mt-3">
-        <button type="submit" class="btn btn-success">
-            <i class="bi bi-credit-card"></i> PEMBAYARAN PESAN
-        </button>
+
     </div>
-</form>
-
-
 </div>
 
 <script>
@@ -215,7 +232,7 @@ function updateTotal() {
 }
 
 function updateSisa() {
-    const dp = parseFloat(document.getElementById('id_dp').value) || 0;
+    const dp = parseFloat(document.getElementById('id_dp').value.replace(/[^\d]/g, '')) || 0;
     const sisa = totalAmount - dp;
     document.getElementById('id_sisa').textContent = `Rp. ${sisa.toLocaleString('id-ID')}`;
 }

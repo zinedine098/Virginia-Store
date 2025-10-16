@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 {% block content %}
 <div class="" style="margin-left: 20px; margin-right: 20px; margin-bottom: 30px;">
     {% if messages %}
@@ -17,7 +18,7 @@
         <div class="col-md-4">{{ form.nama_barang }}</div>
         <div class="col-md-4">{{ form.deskripsi }}</div>
         <div class="col-md-4">{{ form.jumlah_barang }}</div>
-        <div class="col-md-4">{{ form.harga }}</div>
+        <div class="col-md-4">{{ form.harga|attr:"data-currency:true" }}</div>
         <div class="col-md-4">{{ form.gambar }}</div>
         <div class="col-12">
             <button type="submit" name="add_item" class="btn btn-warning" id="submit-btn">+ Tambah</button>
@@ -95,7 +96,7 @@
         </div>
         <div class="col-md-4">
             <label for="id_dp" class="form-label">DP</label>
-            {{ payment_form.dp }}
+            {{ payment_form.dp|attr:"data-currency:true" }}
         </div>
         <div class="col-md-4">
             <label for="id_sisa" class="form-label">Sisa yang Harus Dibayar</label>
