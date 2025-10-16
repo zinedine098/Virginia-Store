@@ -1,5 +1,8 @@
-- [ ] Update cetak_nota_kosong.html: Add Bootstrap modal HTML with form fields (total transaksi readonly, tanggal sisa pembayaran input, jumlah DP input, sisa transaksi display)
-- [ ] Update cetak_nota_kosong.html: Add data attributes to table row for nota data (total_bayar, dp, sisa, tanggal_sisa_bayar)
-- [ ] Update cetak_nota_kosong.html: Modify editDp function to populate modal with data, handle real-time sisa calculation on DP input, and submit form via fetch
-- [ ] Update views.py edit_dp: Modify to accept tanggal_sisa_bayar from POST and update the nota accordingly
-- [ ] Test the functionality: Click Edit DP, input values, check real-time sisa update, submit and verify backend update
+# TODO: Make edit_nota.html display consistent with nota_kosong.html
+
+- [x] Wrap main content in card structure (mx-5 my-5 card my-2)
+- [x] Add inner card for item form section (card px-3 my-4)
+- [x] Apply gray background styles (#D9D9D9) to form inputs
+- [x] Restructure payment form from row g-3 to table layout matching nota_kosong.html
+- [x] Add "Add Customer" modal to edit_nota.html
+- [x] Adjust margins, headings, and overall layout to match nota_kosong.html appearance

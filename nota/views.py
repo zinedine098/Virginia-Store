@@ -99,6 +99,12 @@ def update_quantity(request, item_id):
                 if item['id'] == item_id:
                     item['jumlah_barang'] = max(0, item['jumlah_barang'] + change)
                     item['subtotal'] = item['harga'] * item['jumlah_barang']
+                    # If this is a database item, update the DB
+                    if 'db_id' in item:
+                        from .models import NotaKosong
+                        db_item = NotaKosong.objects.get(id=item['db_id'])
+                        db_item.jumlah_barang = item['jumlah_barang']
+                        db_item.save()
                     break
             request.session['cart'] = cart
             item = next((i for i in cart if i['id'] == item_id), None)
@@ -116,6 +122,19 @@ def update_quantity(request, item_id):
 def delete_item(request, item_id):
     if request.method == 'POST':
         cart = request.session.get('cart', [])
+        # Find the item to delete
+        item_to_delete = None
+        for item in cart:
+            if item['id'] == item_id:
+                item_to_delete = item
+                break
+
+        if item_to_delete and 'db_id' in item_to_delete:
+            # Delete from database
+            from .models import NotaKosong
+            NotaKosong.objects.filter(id=item_to_delete['db_id']).delete()
+
+        # Remove from cart
         cart = [item for item in cart if item['id'] != item_id]
         request.session['cart'] = cart
         return JsonResponse({'success': True})
@@ -147,11 +166,29 @@ def edit_nota(request, nota_id):
         messages.error(request, 'Nota tidak ditemukan.')
         return redirect('nota:cetak-nota-kosong')
 
+    # Initialize cart from session, or load from DB if session is empty
+    cart = request.session.get('cart', [])
+    if not cart:
+        # Load existing items into cart only if session cart is empty
+        cart = []
+        for item in nota.items.all():
+            cart.append({
+                'id': str(uuid.uuid4()),
+                'db_id': item.id,
+                'kode_barang': item.kode_barang,
+                'nama_barang': item.nama_barang,
+                'deskripsi': item.deskripsi,
+                'jumlah_barang': item.jumlah_barang,
+                'harga': float(item.harga),
+                'gambar': item.gambar.url if item.gambar else None,
+                'subtotal': float(item.subtotal)
+            })
+        request.session['cart'] = cart
+
     if request.method == 'POST':
         if 'add_item' in request.POST:
             form = NotaKosongForm(request.POST, request.FILES)
             if form.is_valid():
-                cart = request.session.get('cart', [])
                 gambar_url = None
                 if form.cleaned_data['gambar']:
                     from django.core.files.storage import default_storage
@@ -175,7 +212,6 @@ def edit_nota(request, nota_id):
             item_id = request.POST.get('item_id')
             form = NotaKosongForm(request.POST, request.FILES)
             if form.is_valid() and item_id:
-                cart = request.session.get('cart', [])
                 for item in cart:
                     if item['id'] == item_id:
                         item['kode_barang'] = form.cleaned_data['kode_barang']
@@ -195,7 +231,6 @@ def edit_nota(request, nota_id):
         elif 'submit_payment' in request.POST:
             payment_form = NotaPaymentForm(request.POST, instance=nota)
             if payment_form.is_valid():
-                cart = request.session.get('cart', [])
                 if not cart:
                     messages.error(request, 'Keranjang kosong!')
                     return redirect('nota:edit_nota', nota_id=nota_id)
@@ -251,26 +286,9 @@ def edit_nota(request, nota_id):
                 request.session['cart'] = []
                 messages.success(request, 'Nota berhasil diupdate!')
                 return redirect('nota:cetak-nota-kosong')
-    else:
-        # Load existing items into cart
-        cart = []
-        for item in nota.items.all():
-            cart.append({
-                'id': str(uuid.uuid4()),
-                'db_id': item.id,
-                'kode_barang': item.kode_barang,
-                'nama_barang': item.nama_barang,
-                'deskripsi': item.deskripsi,
-                'jumlah_barang': item.jumlah_barang,
-                'harga': float(item.harga),
-                'gambar': item.gambar.url if item.gambar else None,
-                'subtotal': float(item.subtotal)
-            })
-        request.session['cart'] = cart
 
     form = NotaKosongForm()
     payment_form = NotaPaymentForm(instance=nota)
-    cart = request.session.get('cart', [])
     total = sum(item['subtotal'] for item in cart)
 
     konteks = {
@@ -293,7 +311,13 @@ def cetak_pdf(request, nota_id):
             'items': items,
             'informasi_toko': informasi_toko,
         }
-        return render(request, 'nota_struk.html', context)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # Return HTML as JSON for AJAX requests
+            html = render(request, 'nota_struk_modal.html', context).content.decode('utf-8')
+            return JsonResponse({'success': True, 'html': html})
+        else:
+            # Render full page for direct access
+            return render(request, 'nota_struk.html', context)
     except NotaPayment.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Nota not found'})
 

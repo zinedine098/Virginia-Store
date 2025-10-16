@@ -1,0 +1,167 @@
+{% load static %}
+<div class="container-fluid mt-3" >
+  <div class="struk-container mx-auto" id="struk-cetak" id="hitam">
+    <!-- Header Atas -->
+    <div class="d-flex justify-content-between align-items-start" id="hitam">
+      <div>
+        <p class="small m-0">{{ nota.created_at|date:"d/m/y, H:i A" }}</p>
+        <p class="small m-0" id="hitam">Virginia | Nota Kosong</p>
+      </div>
+      <div class="text-end">
+        <p class="small m-0 fw-bold" id="hitam">INVOICE{{ nota.id }}</p>
+      </div>
+    </div>
+
+    <hr class="my-1">
+
+    <!-- Bagian Logo dan Nama -->
+    <div class="d-flex align-items-center">
+      <img src="{% static 'image/logo.png' %}" alt="Logo" class="logo-img me-2">
+      <div>
+        <h3 class="m-0 fw-bold" id="hitam">VIRGINIA</h3>
+      </div>
+    </div>
+
+    <!-- Informasi Toko -->
+    <div class="row mt-2">
+      <div class="col-8">
+        <p class="m-0" id="hitam"><strong>ADDRESS</strong> : {{ informasi_toko.address|default:"Jl. Raya Legian kelod No. 393 KUTA - BALI" }}</p>
+        <p class="m-0" id="hitam"><strong>FACTORY</strong> : {{ informasi_toko.factory|default:"Jl. Raya Tuban Gg. Danasari No.16 Y KUTA-BALI-INDONESIA, 80361" }}</p>
+        <p class="m-0" id="hitam"><strong>PHONE</strong> : {{ informasi_toko.phone|default:"(+62) 87862223989, (+62) 81236060500" }}</p>
+        <p class="m-0" id="hitam"><strong>MOBILE</strong> : {{ informasi_toko.mobile|default:"(+62) 8124656880" }}</p>
+        <p class="m-0" id="hitam"><strong>EMAIL</strong> : {{ informasi_toko.email|default:"harrykweel@hotmail.com" }}</p>
+      </div>
+      <div class="col-4 text-end" id="hitam">
+        <p class="m-0"><strong>DATE</strong> : {{ nota.created_at|date:"d M Y" }}</p>
+        <p class="m-0"><strong>COSTUMER</strong> : {{ nota.customer.nama|default:"Umum" }}</p>
+        <p class="m-0"><strong>TANGGAL SISA BAYAR</strong> : {{ nota.tanggal_sisa_bayar|date:"d M Y" }}</p>
+      </div>
+    </div>
+
+    <!-- Tabel Produk -->
+    <table class="table table-bordered mt-3 text-center align-middle">
+      <thead>
+        <tr>
+          <th>BARCODE</th>
+          <th>PICTURES</th>
+          <th>ITEM NAME</th>
+          <th>QTY</th>
+          <th>PRICE</th>
+          <th>AMOUNT</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.kode_barang }}</td>
+          <td>
+            {% if item.gambar %}
+              <img src="{{ item.gambar }}" class="foto-produk">
+            {% else %}
+              <span>-</span>
+            {% endif %}
+          </td>
+          <td>{{ item.nama_barang }}</td>
+          <td>{{ item.jumlah_barang }}</td>
+          <td>Rp. {{ item.harga|floatformat:0 }}</td>
+          <td>Rp. {{ item.subtotal|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Bagian Total -->
+    <table class="table table-bordered text-end">
+      <tr>
+        <td><strong>TOTAL</strong></td>
+        <td style="width: 120px;"><strong>Rp. {{ nota.total_bayar|floatformat:0 }}</strong></td>
+      </tr>
+      <tr>
+        <td><strong>DP</strong></td>
+        <td style="width: 120px;"><strong>Rp. {{ nota.dp|floatformat:0 }}</strong></td>
+      </tr>
+      <tr>
+        <td><strong>SISA BAYAR</strong></td>
+        <td style="width: 120px;"><strong>Rp. {{ nota.sisa|floatformat:0 }}</strong></td>
+      </tr>
+    </table>
+  </div>
+  <div class="text-center mt-3 d-print-none">
+      <button class="btn btn-primary btn-sm" onclick="window.print()">Cetak Struk</button>
+      <a href="{% url 'nota:cetak-nota-kosong' %}" class="btn btn-secondary btn-sm">Kembali</a>
+  </div>
+</div>
+
+<!-- CSS -->
+<style>
+#hitam {
+  color: black;
+}
+
+.struk-container {
+  width: 100%;
+  max-width: 820px;
+  border: 1px solid #000;
+  padding: 15px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #fff;
+}
+
+.logo-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.table {
+  font-size: 14px;
+  border-color: #000;
+  --bs-table-color: black;
+  --bs-table-bg: #fff;
+}
+
+.table th, .table td {
+  border: 1px solid #000 !important;
+  padding: 4px;
+  color: black !important;
+  background-color: #fff !important;
+}
+
+.table thead th {
+  color: black !important;
+  background-color: #fff !important;
+}
+
+.table tbody td {
+  color: black !important;
+  background-color: #fff !important;
+}
+
+.foto-produk {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #000;
+}
+
+/* Cetak */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #struk-cetak, #struk-cetak * {
+    visibility: visible;
+  }
+  #struk-cetak {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none;
+  }
+}
+</style>
