@@ -99,8 +99,8 @@
   .cart-sidebar {
     position: fixed;
     right: 0;
-    top: 0;
-    height: 100vh;
+    top: 56px; /* Adjust to be below the navbar (assuming navbar height is 56px) */
+    height: calc(100vh - 56px); /* Adjust height to account for navbar */
     width: 380px;
     background-color: #ffffff;
     color: #212529;
