@@ -18,6 +18,15 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.nama
+    
+class Suplayer(models.Model):
+    nama = models.CharField(max_length=100)
+    alamat_suplayer = models.TextField(blank=True, null=True)
+    no_telpon_suplayer = models.CharField(max_length=20, blank=True, null=True)
+    shipping_agent = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return self.nama
 
 class Transaksi(models.Model):
     PAYMENT_METHOD_CHOICES = [
