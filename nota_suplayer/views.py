@@ -36,23 +36,23 @@ def nota_kosong(request):
                 cart.append(item)
                 request.session['cart'] = cart
                 messages.success(request, 'Barang berhasil ditambahkan ke keranjang!')
-                return redirect('nota:nota-kosong')
+                return redirect('nota_suplayer:nota-kosong')
         elif 'submit_payment' in request.POST:
             payment_form = NotaPaymentForm(request.POST)
             if payment_form.is_valid():
                 cart = request.session.get('cart', [])
                 if not cart:
                     messages.error(request, 'Keranjang kosong!')
-                    return redirect('nota:nota-kosong')
+                    return redirect('nota_suplayer:nota-kosong')
                 total = sum(item['subtotal'] for item in cart)
                 dp = float(payment_form.cleaned_data['dp'])
                 sisa = total - dp
                 if sisa < 0:
                     messages.error(request, 'DP tidak boleh lebih dari total!')
-                    return redirect('nota:nota-kosong')
+                    return redirect('nota_suplayer:nota-kosong')
                 # Save to database
                 nota_payment = NotaPayment.objects.create(
-                    customer=payment_form.cleaned_data['customer'],
+                    suplayer=payment_form.cleaned_data['suplayer'],
                     tanggal_sisa_bayar=payment_form.cleaned_data['tanggal_sisa_bayar'],
                     metode_pembayaran=payment_form.cleaned_data['metode_pembayaran'],
                     total_bayar=total,
@@ -72,7 +72,7 @@ def nota_kosong(request):
                 # Clear cart
                 request.session['cart'] = []
                 messages.success(request, 'Nota berhasil disimpan!')
-                return redirect('nota:nota-kosong')
+                return redirect('nota_suplayer:nota-kosong')
     else:
         form = NotaKosongForm()
         payment_form = NotaPaymentForm()
@@ -86,7 +86,7 @@ def nota_kosong(request):
         'daftar_barang': cart,
         'total': total
     }
-    return render(request, 'nota_kosong.html', konteks)
+    return render(request, 'nota_kosong_suplayer.html', konteks)
 
 @csrf_exempt
 def update_quantity(request, item_id):
@@ -164,7 +164,7 @@ def edit_nota(request, nota_id):
         nota = NotaPayment.objects.get(id=nota_id)
     except NotaPayment.DoesNotExist:
         messages.error(request, 'Nota tidak ditemukan.')
-        return redirect('nota:cetak-nota-kosong')
+        return redirect('nota_suplayer:cetak-nota-kosong')
 
     # Initialize cart from session, or load from DB if session is empty
     cart = request.session.get('cart', [])
@@ -207,7 +207,7 @@ def edit_nota(request, nota_id):
                 cart.append(item)
                 request.session['cart'] = cart
                 messages.success(request, 'Barang berhasil ditambahkan ke keranjang!')
-                return redirect('nota:edit_nota', nota_id=nota_id)
+                return redirect('nota_suplayer:edit_nota', nota_id=nota_id)
         elif 'update_item' in request.POST:
             item_id = request.POST.get('item_id')
             form = NotaKosongForm(request.POST, request.FILES)
@@ -227,13 +227,13 @@ def edit_nota(request, nota_id):
                         break
                 request.session['cart'] = cart
                 messages.success(request, 'Barang berhasil diupdate!')
-                return redirect('nota:edit_nota', nota_id=nota_id)
+                return redirect('nota_suplayer:edit_nota', nota_id=nota_id)
         elif 'submit_payment' in request.POST:
             payment_form = NotaPaymentForm(request.POST, instance=nota)
             if payment_form.is_valid():
                 if not cart:
                     messages.error(request, 'Keranjang kosong!')
-                    return redirect('nota:edit_nota', nota_id=nota_id)
+                    return redirect('nota_suplayer:edit_nota', nota_id=nota_id)
 
                 # Get existing items
                 existing_items = {item.id: item for item in nota.items.all()}
@@ -285,7 +285,7 @@ def edit_nota(request, nota_id):
                 # Clear cart
                 request.session['cart'] = []
                 messages.success(request, 'Nota berhasil diupdate!')
-                return redirect('nota:cetak-nota-kosong')
+                return redirect('nota_suplayer:cetak-nota-kosong')
 
     form = NotaKosongForm()
     payment_form = NotaPaymentForm(instance=nota)

@@ -11,7 +11,7 @@
             </div>
         {% endif %}
         <div class="card px-3 my-4">
-            <h5 class="my-4">Isi Barang Nota Kosong</h5>
+            <h5 class="my-4">Isi Barang Nota Suplayer   </h5>
 
             <form method="POST" enctype="multipart/form-data" class="row g-3">
                 {% csrf_token %}
@@ -125,9 +125,9 @@
                                     <th style="width: 30%;">Suplayer</th>
                                     <td style="width: 70%;">
                                         <div class="input-group">
-                                            {{ payment_form.customer }}
-                                            <button type="button" class="btn btn-warning" 
-                                                data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+                                            {{ payment_form.suplayer }}
+                                            <button type="button" class="btn btn-warning"
+                                                data-bs-toggle="modal" data-bs-target="#addSuplayerModal">
                                                 Tambah
                                             </button>
                                         </div>
@@ -179,7 +179,7 @@
 
 <script>
 function updateQuantity(id, change) {
-    fetch(`/nota/update_quantity/${id}/`, {
+    fetch(`/nota_suplayer/update_quantity_suplayer/${id}/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -199,12 +199,12 @@ function updateQuantity(id, change) {
 
 function editItem(id) {
     // Redirect to edit page or open modal
-    window.location.href = `/nota/edit/${id}/`;
+    window.location.href = `/nota_suplayer/edit_nota_suplayer/${id}/`;
 }
 
 function deleteItem(id) {
     if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
-        fetch(`/nota/delete/${id}/`, {
+        fetch(`/nota_suplayer/delete_item/${id}/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
@@ -242,10 +242,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('id_dp').addEventListener('input', updateSisa);
 });
 
-// Add Customer Modal JavaScript
-function addCustomer() {
-    const formData = new FormData(document.getElementById('customerForm'));
-    fetch('/nota/add_customer/', {
+// Add Suplayer Modal JavaScript
+function addSuplayer() {
+    const formData = new FormData(document.getElementById('suplayerForm'));
+    fetch('/nota_suplayer/add_suplayer/', {
         method: 'POST',
         body: formData,
         headers: {
@@ -256,15 +256,15 @@ function addCustomer() {
     .then(data => {
         if (data.success) {
             // Add new option to select
-            const select = document.getElementById('id_customer');
-            const option = new Option(data.customer_name, data.customer_id);
+            const select = document.getElementById('id_suplayer');
+            const option = new Option(data.suplayer_name, data.suplayer_id);
             select.add(option);
-            select.value = data.customer_id;
+            select.value = data.suplayer_id;
             // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerModal'));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addSuplayerModal'));
             modal.hide();
             // Reset form
-            document.getElementById('customerForm').reset();
+            document.getElementById('suplayerForm').reset();
         } else {
             // Handle errors
             alert('Error: ' + JSON.stringify(data.errors));
@@ -276,28 +276,28 @@ function addCustomer() {
 }
 </script>
 
-<!-- Add Customer Modal -->
-<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+<!-- Add Suplayer Modal -->
+<div class="modal fade" id="addSuplayerModal" tabindex="-1" aria-labelledby="addSuplayerModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addCustomerModalLabel">Tambah Pelanggan Baru</h5>
+                <h5 class="modal-title" id="addSuplayerModalLabel">Tambah Suplayer Baru</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="customerForm">
+                <form id="suplayerForm">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="id_nama" class="form-label">Nama Pelanggan</label>
+                        <label for="id_nama" class="form-label">Nama Suplayer</label>
                         <input type="text" class="form-control" id="id_nama" name="nama" required>
                     </div>
                     <div class="mb-3">
-                        <label for="id_alamat_customer" class="form-label">Alamat</label>
-                        <textarea class="form-control" id="id_alamat_customer" name="alamat_customer" rows="2"></textarea>
+                        <label for="id_alamat_suplayer" class="form-label">Alamat</label>
+                        <textarea class="form-control" id="id_alamat_suplayer" name="alamat_suplayer" rows="2"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="id_no_telpon_customer" class="form-label">No. Telepon</label>
-                        <input type="text" class="form-control" id="id_no_telpon_customer" name="no_telpon_customer">
+                        <label for="id_no_telpon_suplayer" class="form-label">No. Telepon</label>
+                        <input type="text" class="form-control" id="id_no_telpon_suplayer" name="no_telpon_suplayer">
                     </div>
                     <div class="mb-3">
                         <label for="id_shipping_agent" class="form-label">Shipping Agent</label>
@@ -307,7 +307,7 @@ function addCustomer() {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" onclick="addCustomer()">Simpan</button>
+                <button type="button" class="btn btn-primary" onclick="addSuplayer()">Simpan</button>
             </div>
         </div>
     </div>

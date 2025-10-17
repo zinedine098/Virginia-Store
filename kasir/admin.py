@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Produk, Customer, Transaksi, DetailTransaksi, InformasiToko
+from .models import Produk, Customer, Transaksi, DetailTransaksi, InformasiToko, Suplayer
 
 @admin.register(Produk)
 class ProdukAdmin(admin.ModelAdmin):
@@ -11,6 +11,12 @@ class ProdukAdmin(admin.ModelAdmin):
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ('nama', 'alamat_customer', 'no_telpon_customer', 'shipping_agent')
     search_fields = ('nama', 'no_telpon_customer')
+    list_filter = ('shipping_agent',)
+
+@admin.register(Suplayer)
+class SuplayerAdmin(admin.ModelAdmin):
+    list_display = ('nama', 'alamat_suplayer', 'no_telpon_suplayer', 'shipping_agent')
+    search_fields = ('nama', 'no_telpon_suplayer')
     list_filter = ('shipping_agent',)
 
 @admin.register(Transaksi)
