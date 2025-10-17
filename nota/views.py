@@ -326,10 +326,10 @@ def nota_palsu(request, nota_id):
         potongan = request.POST.get('potongan')
         try:
             nota = NotaPayment.objects.get(id=nota_id)
-            # Apply potongan to total_bayar or sisa
-            # For example, reduce sisa by potongan percent
+            # Apply potongan to total_bayar
             potongan_decimal = Decimal(potongan) / 100
-            nota.sisa = nota.sisa * (1 - potongan_decimal)
+            nota.total_bayar = nota.total_bayar * (1 - potongan_decimal)
+            nota.sisa = nota.total_bayar - nota.dp
             nota.save()
             return JsonResponse({'success': True})
         except NotaPayment.DoesNotExist:
