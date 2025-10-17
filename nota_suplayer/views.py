@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from .forms import NotaKosongForm, NotaPaymentForm, CustomerForm
-from .models import NotaPayment, NotaKosong
-from kasir.models import Customer
+from .forms import NotaKosongForm, NotaPaymentForm, SuplayerForm
+from .models import NotaPayment, NotaSuplayer
+from kasir.models import Suplayer
 import json
 import uuid
 from decimal import Decimal
@@ -16,7 +16,7 @@ def nota_kosong(request):
             form = NotaKosongForm(request.POST, request.FILES)
             if form.is_valid():
                 # Instead of saving to DB, add to session cart
-                cart = request.session.get('cart_nota', [])
+                cart = request.session.get('cart', [])
                 gambar_url = None
                 if form.cleaned_data['gambar']:
                     # Save the file temporarily and get URL
@@ -34,13 +34,13 @@ def nota_kosong(request):
                     'subtotal': float(form.cleaned_data['harga']) * form.cleaned_data['jumlah_barang']
                 }
                 cart.append(item)
-                request.session['cart_nota'] = cart
+                request.session['cart'] = cart
                 messages.success(request, 'Barang berhasil ditambahkan ke keranjang!')
                 return redirect('nota:nota-kosong')
         elif 'submit_payment' in request.POST:
             payment_form = NotaPaymentForm(request.POST)
             if payment_form.is_valid():
-                cart = request.session.get('cart_nota', [])
+                cart = request.session.get('cart', [])
                 if not cart:
                     messages.error(request, 'Keranjang kosong!')
                     return redirect('nota:nota-kosong')
@@ -60,7 +60,7 @@ def nota_kosong(request):
                     sisa=sisa
                 )
                 for item in cart:
-                    NotaKosong.objects.create(
+                    NotaSuplayer.objects.create(
                         nota_payment=nota_payment,
                         kode_barang=item['kode_barang'],
                         nama_barang=item['nama_barang'],
@@ -70,14 +70,14 @@ def nota_kosong(request):
                         gambar=item['gambar']
                     )
                 # Clear cart
-                request.session['cart_nota'] = []
+                request.session['cart'] = []
                 messages.success(request, 'Nota berhasil disimpan!')
                 return redirect('nota:nota-kosong')
     else:
         form = NotaKosongForm()
         payment_form = NotaPaymentForm()
 
-    cart = request.session.get('cart_nota', [])
+    cart = request.session.get('cart', [])
     total = sum(item['subtotal'] for item in cart)
 
     konteks = {
@@ -94,7 +94,7 @@ def update_quantity(request, item_id):
         try:
             data = json.loads(request.body)
             change = data.get('change', 0)
-            cart = request.session.get('cart_nota', [])
+            cart = request.session.get('cart', [])
             for item in cart:
                 if item['id'] == item_id:
                     item['jumlah_barang'] = max(0, item['jumlah_barang'] + change)
@@ -106,7 +106,7 @@ def update_quantity(request, item_id):
                         db_item.jumlah_barang = item['jumlah_barang']
                         db_item.save()
                     break
-            request.session['cart_nota'] = cart
+            request.session['cart'] = cart
             item = next((i for i in cart if i['id'] == item_id), None)
             if item:
                 return JsonResponse({
@@ -121,7 +121,7 @@ def update_quantity(request, item_id):
 @csrf_exempt
 def delete_item(request, item_id):
     if request.method == 'POST':
-        cart = request.session.get('cart_nota', [])
+        cart = request.session.get('cart', [])
         # Find the item to delete
         item_to_delete = None
         for item in cart:
@@ -136,7 +136,7 @@ def delete_item(request, item_id):
 
         # Remove from cart
         cart = [item for item in cart if item['id'] != item_id]
-        request.session['cart_nota'] = cart
+        request.session['cart'] = cart
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
@@ -167,7 +167,7 @@ def edit_nota(request, nota_id):
         return redirect('nota:cetak-nota-kosong')
 
     # Initialize cart from session, or load from DB if session is empty
-    cart = request.session.get('cart_nota', [])
+    cart = request.session.get('cart', [])
     if not cart:
         # Load existing items into cart only if session cart is empty
         cart = []
@@ -183,7 +183,7 @@ def edit_nota(request, nota_id):
                 'gambar': item.gambar.url if item.gambar else None,
                 'subtotal': float(item.subtotal)
             })
-        request.session['cart_nota'] = cart
+        request.session['cart'] = cart
 
     if request.method == 'POST':
         if 'add_item' in request.POST:
@@ -205,7 +205,7 @@ def edit_nota(request, nota_id):
                     'subtotal': float(form.cleaned_data['harga']) * form.cleaned_data['jumlah_barang']
                 }
                 cart.append(item)
-                request.session['cart_nota'] = cart
+                request.session['cart'] = cart
                 messages.success(request, 'Barang berhasil ditambahkan ke keranjang!')
                 return redirect('nota:edit_nota', nota_id=nota_id)
         elif 'update_item' in request.POST:
@@ -225,7 +225,7 @@ def edit_nota(request, nota_id):
                             item['gambar'] = default_storage.url(file_name)
                         item['subtotal'] = item['harga'] * item['jumlah_barang']
                         break
-                request.session['cart_nota'] = cart
+                request.session['cart'] = cart
                 messages.success(request, 'Barang berhasil diupdate!')
                 return redirect('nota:edit_nota', nota_id=nota_id)
         elif 'submit_payment' in request.POST:
@@ -255,7 +255,7 @@ def edit_nota(request, nota_id):
                         cart_item_ids.add(db_id)
                     else:
                         # Create new
-                        NotaKosong.objects.create(
+                        NotaSuplayer.objects.create(
                             nota_payment=nota,
                             kode_barang=item['kode_barang'],
                             nama_barang=item['nama_barang'],
@@ -283,7 +283,7 @@ def edit_nota(request, nota_id):
                 nota.save()
 
                 # Clear cart
-                request.session['cart_nota'] = []
+                request.session['cart'] = []
                 messages.success(request, 'Nota berhasil diupdate!')
                 return redirect('nota:cetak-nota-kosong')
 
@@ -303,7 +303,7 @@ def edit_nota(request, nota_id):
 def cetak_pdf(request, nota_id):
     try:
         nota = NotaPayment.objects.get(id=nota_id)
-        items = NotaKosong.objects.filter(nota_payment=nota)
+        items = NotaSuplayer.objects.filter(nota_payment=nota)
         from kasir.models import InformasiToko
         informasi_toko = InformasiToko.objects.first()
         context = {
@@ -339,7 +339,7 @@ def nota_palsu(request, nota_id):
 def cetak_pdf_nota_palsu(request, nota_id):
     try:
         nota = NotaPayment.objects.get(id=nota_id)
-        items = NotaKosong.objects.filter(nota_payment=nota)
+        items = NotaSuplayer.objects.filter(nota_payment=nota)
         persen = request.GET.get('persen', 0)
         persen_decimal = Decimal(persen) / 100 if persen else Decimal(0)
         from kasir.models import InformasiToko
@@ -373,15 +373,15 @@ def cetak_pdf_nota_palsu(request, nota_id):
         return JsonResponse({'success': False, 'error': 'Nota not found'})
 
 @csrf_exempt
-def add_customer(request):
+def add_suplayer(request):
     if request.method == 'POST':
-        form = CustomerForm(request.POST)
+        form = SuplayerForm(request.POST)
         if form.is_valid():
-            customer = form.save()
+            suplayer = form.save()
             return JsonResponse({
                 'success': True,
-                'customer_id': customer.id,
-                'customer_name': customer.nama
+                'suplayer_id': suplayer.id,
+                'suplayer_name': suplayer.nama
             })
         else:
             return JsonResponse({

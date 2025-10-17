@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% block content %}
+{% csrf_token %}
+<div class="" style="margin-left: 20px; margin-right: 20px;">
+    <table class="table table-bordered table-striped mt-3">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Waktu Transaksi</th>
+                <th>Pelanggan</th>
+                <th>Metode Bayar</th>
+                <th>Total Bayar</th>
+                <th>DP</th>
+                <th>Sisa Bayar</th>
+                <th>Tanggal Sisa Bayar</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nota in notas %}
+            <tr data-id="{{ nota.id }}" data-total="{{ nota.total_bayar }}" data-dp="{{ nota.dp }}" data-sisa="{{ nota.sisa }}" data-tanggal="{{ nota.tanggal_sisa_bayar|date:'Y-m-d' }}">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ nota_suplayer.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ nota_suplayer.suplayer.nama }}</td>
+                <td>{{ nota_suplayer.get_metode_pembayaran_display }}</td>
+                <td>Rp. {{ nota_suplayer.total_bayar|floatformat:0 }}</td>
+                <td>Rp. {{ nota_suplayer.dp|floatformat:0 }}</td>
+                <td>Rp. {{ nota_suplayer.sisa|floatformat:0 }}</td>
+                <td>{{ nota_suplayer.tanggal_sisa_bayar|date:"d/m/Y" }}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" data-id="{{ nota_suplayer.id }}" onclick="cetakPdf(this)">Cetak PDF</button>
+                    <button class="btn btn-sm btn-warning" data-id="{{ nota_suplayer.id }}" onclick="editDp(this)">Edit DP</button>
+                    <button class="btn btn-sm btn-info" data-id="{{ nota_suplayer.id }}" onclick="editNota(this)">Edit Nota</button>
+                    <button class="btn btn-sm btn-secondary" data-id="{{ nota_suplayer.id }}" onclick="notaPalsu(this)">Nota Palsu</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="text-center">Belum ada data</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal for Nota Struk -->
+<div class="modal fade" id="notaStrukModal" tabindex="-1" aria-labelledby="notaStrukModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notaStrukModalLabel">Nota Struk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="notaStrukContent">
+                <!-- Struk content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Edit DP -->
+<div class="modal fade" id="editDpModal" tabindex="-1" aria-labelledby="editDpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editDpModalLabel">Edit DP</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editDpForm">
+                    <div class="mb-3">
+                        <label for="totalTransaksi" class="form-label">Total Transaksi</label>
+                        <input type="text" class="form-control" id="totalTransaksi" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tanggalSisaBayar" class="form-label">Tanggal Sisa Pembayaran</label>
+                        <input type="date" class="form-control" id="tanggalSisaBayar" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jumlahDp" class="form-label">Jumlah DP</label>
+                        <input type="text" class="form-control" id="jumlahDp" data-currency="true" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sisaTransaksi" class="form-label">Sisa Transaksi</label>
+                        <input type="text" class="form-control" id="sisaTransaksi" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="saveDpBtn">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Nota Palsu -->
+<div class="modal fade" id="notaPalsuModal" tabindex="-1" aria-labelledby="notaPalsuModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notaPalsuModalLabel">Pembuatan Nota Palsu Nota Kosong dari Invoice ...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="notaPalsuForm">
+                    <div class="mb-3">
+                        <label for="persen" class="form-label">Persen</label>
+                        <input type="number" class="form-control" id="persen" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="prosesPersenBtn">Proses Persen</button>
+                <button type="button" class="btn btn-success" id="cetakPdfNotaPalsuBtn">Cetak PDF Nota Palsu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function cetakPdf(button) {
+    const id = button.getAttribute('data-id');
+    fetch('/nota/cetak_pdf/' + id + '/', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('notaStrukContent').innerHTML = data.html;
+            const modal = new bootstrap.Modal(document.getElementById('notaStrukModal'));
+            modal.show();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat memuat nota struk.');
+    });
+}
+
+let currentNotaId = null;
+
+function editDp(button) {
+    const row = button.closest('tr');
+    currentNotaId = row.getAttribute('data-id');
+    const total = parseFloat(row.getAttribute('data-total'));
+    const dp = parseFloat(row.getAttribute('data-dp'));
+    const tanggal = row.getAttribute('data-tanggal');
+
+    // Populate modal
+    document.getElementById('totalTransaksi').value = formatCurrency(total.toString());
+    document.getElementById('tanggalSisaBayar').value = tanggal;
+    document.getElementById('jumlahDp').value = formatCurrency(dp.toString());
+    updateSisaTransaksi();
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('editDpModal'));
+    modal.show();
+}
+
+function updateSisaTransaksi() {
+    const total = unformatCurrency(document.getElementById('totalTransaksi').value);
+    const dp = unformatCurrency(document.getElementById('jumlahDp').value);
+    const sisa = total - dp;
+    document.getElementById('sisaTransaksi').value = formatCurrency(sisa.toString());
+}
+
+// Event listener for DP input
+document.getElementById('jumlahDp').addEventListener('input', updateSisaTransaksi);
+
+// Save button event
+document.getElementById('saveDpBtn').addEventListener('click', function() {
+    const tanggal = document.getElementById('tanggalSisaBayar').value;
+    const dp = unformatCurrency(document.getElementById('jumlahDp').value);
+
+    fetch('/nota/edit_dp/' + currentNotaId + '/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: 'dp=' + dp + '&tanggal_sisa_bayar=' + tanggal
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+});
+
+function editNota(button) {
+    const id = button.getAttribute('data-id');
+    window.location.href = '/nota/edit_nota/' + id + '/';
+}
+
+function notaPalsu(button) {
+    currentNotaId = button.getAttribute('data-id');
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('notaPalsuModal'));
+    modal.show();
+}
+
+// Proses Persen button event
+document.getElementById('prosesPersenBtn').addEventListener('click', function() {
+    const persen = document.getElementById('persen').value;
+    if (persen) {
+        fetch('/nota/nota_palsu/' + currentNotaId + '/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: 'potongan=' + persen
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Potongan berhasil diproses.');
+            } else {
+                alert('Error: ' + data.error);
+            }
+        });
+    } else {
+        alert('Masukkan persen terlebih dahulu.');
+    }
+});
+
+// Cetak PDF Nota Palsu button event
+document.getElementById('cetakPdfNotaPalsuBtn').addEventListener('click', function() {
+    const persen = document.getElementById('persen').value;
+    if (persen) {
+        fetch('/nota/cetak_pdf_nota_palsu/' + currentNotaId + '/?persen=' + persen, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Replace the modal content with the struk
+                document.getElementById('notaPalsuModalLabel').innerText = 'Nota Struk Palsu';
+                document.getElementById('notaPalsuModal').querySelector('.modal-body').innerHTML = data.html;
+                // Optionally hide the footer or modify buttons
+                document.getElementById('notaPalsuModal').querySelector('.modal-footer').style.display = 'none';
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat memuat nota struk palsu.');
+        });
+    } else {
+        alert('Masukkan persen terlebih dahulu.');
+    }
+});
+</script>
+{% endblock %}

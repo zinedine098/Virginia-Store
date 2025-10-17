@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('kasir.urls')),
     path('nota/', include('nota.urls')),
+    path('nota_suplayer/', include('nota_suplayer.urls')),
 ]
 
 if settings.DEBUG:

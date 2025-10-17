@@ -9,6 +9,6 @@
 - [x] Edit nota_suplayer/templates/nota_kosong.html: Replace 'customer' with 'suplayer', update labels
 - [x] Edit nota_suplayer/templates/edit_nota.html: Replace 'customer' with 'suplayer', update labels
 - [x] Edit nota_suplayer/templates/cetak_nota_kosong.html: Replace 'customer' with 'suplayer', update labels
-- [ ] Run python manage.py makemigrations nota_suplayer
-- [ ] Run python manage.py migrate
+- [x] Run python manage.py makemigrations nota_suplayer
+- [x] Run python manage.py migrate
 - [ ] Test the app
