@@ -1,6 +1,5 @@
-- Add CSS class .indented-p with margin-left: 10px; white-space: nowrap; in the <style> section.
-- Apply class="indented-p" to the ADDRESS <p> tag.
-- Apply class="indented-p" to the FACTORY <p> tag.
-- Apply class="indented-p" to the PHONE <p> tag.
-- Apply class="indented-p" to the MOBILE <p> tag.
-- Apply class="indented-p" to the EMAIL <p> tag.
+- [x] Add modal for Nota Palsu in cetak_nota_kosong.html
+- [x] Modify notaPalsu function to open modal instead of prompt
+- [x] Add URL for cetak_pdf_nota_palsu in nota/urls.py
+- [x] Add view cetak_pdf_nota_palsu in nota/views.py
+- [ ] Test the functionality

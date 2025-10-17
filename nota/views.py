@@ -336,6 +336,42 @@ def nota_palsu(request, nota_id):
             return JsonResponse({'success': False, 'error': 'Nota not found'})
     return JsonResponse({'success': False})
 
+def cetak_pdf_nota_palsu(request, nota_id):
+    try:
+        nota = NotaPayment.objects.get(id=nota_id)
+        items = NotaKosong.objects.filter(nota_payment=nota)
+        persen = request.GET.get('persen', 0)
+        persen_decimal = Decimal(persen) / 100 if persen else Decimal(0)
+        from kasir.models import InformasiToko
+        informasi_toko = InformasiToko.objects.first()
+        # Apply potongan to items
+        modified_items = []
+        for item in items:
+            modified_item = item
+            modified_item.harga = item.harga * (1 - persen_decimal)
+            modified_items.append(modified_item)
+        # Recalculate totals
+        total_bayar = sum(item.subtotal for item in modified_items)
+        dp = nota.dp
+        sisa = total_bayar - dp
+        context = {
+            'nota': nota,
+            'items': modified_items,
+            'informasi_toko': informasi_toko,
+            'total_bayar': total_bayar,
+            'dp': dp,
+            'sisa': sisa,
+        }
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # Return HTML as JSON for AJAX requests
+            html = render(request, 'nota_struk_modal.html', context).content.decode('utf-8')
+            return JsonResponse({'success': True, 'html': html})
+        else:
+            # Render full page for direct access
+            return render(request, 'nota_struk_modal.html', context)
+    except NotaPayment.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Nota not found'})
+
 @csrf_exempt
 def add_customer(request):
     if request.method == 'POST':

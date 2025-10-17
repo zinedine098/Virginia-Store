@@ -21,14 +21,14 @@
       <img src="{% static 'image/logo.png' %}" 
               alt="Logo" 
               class="me-3 align-middle" 
-              style="height: 160px; width: auto; display: inline-block; vertical-align: middle;">
+              style="height: 112px; width: auto; display: inline-block; vertical-align: middle;">
 
       <!-- Bagian Teks -->
       <div class="flex-grow-1">
         <h3 class="m-0 fw-bold" id="hitam">VIRGINIA</h3>
 
         <!-- Informasi Toko -->
-        <div class="row mt-1" style="font-size: 13px;">
+        <div class="row mt-1" style="font-size: 10px;">
           <div class="col-8">
             <p class="m-0" id="hitam"><strong>ADDRESS</strong> : {{ informasi_toko.address|default:"Jl. Raya Legian kelod No. 393 KUTA - BALI" }}</p>
             <p class="m-0" id="hitam"><strong>FACTORY</strong> : {{ informasi_toko.factory|default:"Jl. Raya Tuban Gg. Danasari No.16 Y KUTA-BALI-INDONESIA, 80361" }}</p>
@@ -36,7 +36,8 @@
             <p class="m-0" id="hitam"><strong>MOBILE</strong> : {{ informasi_toko.mobile|default:"(+62) 8124656880" }}</p>
             <p class="m-0" id="hitam"><strong>EMAIL</strong> : {{ informasi_toko.email|default:"harrykweel@hotmail.com" }}</p>
           </div>
-          <div class="col-4 text-end" id="hitam">
+          <!-- Kolom Kanan -->
+          <div class="col-4 d-flex flex-column justify-content-between text-end align-items-end" id="hitam">
             <p class="m-0"><strong>DATE</strong> : {{ nota.created_at|date:"d M Y" }}</p>
             <p class="m-0"><strong>CUSTOMER</strong> : {{ nota.customer.nama|default:"Umum" }}</p>
             <p class="m-0"><strong>TANGGAL SISA BAYAR</strong> : {{ nota.tanggal_sisa_bayar|date:"d M Y" }}</p>
@@ -153,12 +154,6 @@ h3 {
 hr {
   border: none;
   border-top: 1px solid #000;
-}
-
-/* === INDENTED P === */
-.indented-p {
-  margin-left: 10px;
-  white-space: nowrap;
 }
 
 /* === MODE CETAK === */

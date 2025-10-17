@@ -92,6 +92,31 @@
     </div>
 </div>
 
+<!-- Modal for Nota Palsu -->
+<div class="modal fade" id="notaPalsuModal" tabindex="-1" aria-labelledby="notaPalsuModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notaPalsuModalLabel">Pembuatan Nota Palsu Nota Kosong dari Invoice ...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="notaPalsuForm">
+                    <div class="mb-3">
+                        <label for="persen" class="form-label">Persen</label>
+                        <input type="number" class="form-control" id="persen" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="prosesPersenBtn">Proses Persen</button>
+                <button type="button" class="btn btn-success" id="cetakPdfNotaPalsuBtn">Cetak PDF Nota Palsu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function cetakPdf(button) {
     const id = button.getAttribute('data-id');
@@ -176,26 +201,66 @@ function editNota(button) {
 }
 
 function notaPalsu(button) {
-    const id = button.getAttribute('data-id');
-    const potongan = prompt('Masukkan potongan persen:');
-    if (potongan !== null) {
-        fetch('/nota/nota_palsu/' + id + '/', {
+    currentNotaId = button.getAttribute('data-id');
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('notaPalsuModal'));
+    modal.show();
+}
+
+// Proses Persen button event
+document.getElementById('prosesPersenBtn').addEventListener('click', function() {
+    const persen = document.getElementById('persen').value;
+    if (persen) {
+        fetch('/nota/nota_palsu/' + currentNotaId + '/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
             },
-            body: 'potongan=' + potongan
+            body: 'potongan=' + persen
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                location.reload();
+                alert('Potongan berhasil diproses.');
             } else {
                 alert('Error: ' + data.error);
             }
         });
+    } else {
+        alert('Masukkan persen terlebih dahulu.');
     }
-}
+});
+
+// Cetak PDF Nota Palsu button event
+document.getElementById('cetakPdfNotaPalsuBtn').addEventListener('click', function() {
+    const persen = document.getElementById('persen').value;
+    if (persen) {
+        fetch('/nota/cetak_pdf_nota_palsu/' + currentNotaId + '/?persen=' + persen, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Replace the modal content with the struk
+                document.getElementById('notaPalsuModalLabel').innerText = 'Nota Struk Palsu';
+                document.getElementById('notaPalsuModal').querySelector('.modal-body').innerHTML = data.html;
+                // Optionally hide the footer or modify buttons
+                document.getElementById('notaPalsuModal').querySelector('.modal-footer').style.display = 'none';
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat memuat nota struk palsu.');
+        });
+    } else {
+        alert('Masukkan persen terlebih dahulu.');
+    }
+});
 </script>
 {% endblock %}

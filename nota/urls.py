@@ -12,5 +12,6 @@ urlpatterns = [
     path('edit_nota/<int:nota_id>/', views.edit_nota, name='edit_nota'),
     path('cetak_pdf/<int:nota_id>/', views.cetak_pdf, name='cetak_pdf'),
     path('nota_palsu/<int:nota_id>/', views.nota_palsu, name='nota_palsu'),
+    path('cetak_pdf_nota_palsu/<int:nota_id>/', views.cetak_pdf_nota_palsu, name='cetak_pdf_nota_palsu'),
     path('add_customer/', views.add_customer, name='add_customer'),
 ]
