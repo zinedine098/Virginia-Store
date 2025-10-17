@@ -274,7 +274,7 @@ def edit_nota(request, nota_id):
                 total = sum(item['subtotal'] for item in cart)
                 dp = float(payment_form.cleaned_data['dp'])
                 sisa = total - dp
-                nota.customer = payment_form.cleaned_data['customer']
+                nota.suplayer = payment_form.cleaned_data['suplayer']
                 nota.tanggal_sisa_bayar = payment_form.cleaned_data['tanggal_sisa_bayar']
                 nota.metode_pembayaran = payment_form.cleaned_data['metode_pembayaran']
                 nota.total_bayar = total
