@@ -318,36 +318,15 @@ def cetak_pdf_nota_palsu(request, nota_id):
     try:
         nota = NotaPayment.objects.get(id=nota_id)
         items = NotaSuplayer.objects.filter(nota_payment=nota)
-        persen = request.GET.get('persen', 0)
-        persen_decimal = Decimal(persen) / 100 if persen else Decimal(0)
         from kasir.models import InformasiToko
         informasi_toko = InformasiToko.objects.first()
-        # Apply potongan to items without modifying originals
-        modified_items = []
-        for item in items:
-            modified_harga = item.harga * (1 - persen_decimal)
-            modified_subtotal = modified_harga * item.jumlah_barang
-            modified_items.append({
-                'id': item.id,
-                'kode_barang': item.kode_barang,
-                'nama_barang': item.nama_barang,
-                'deskripsi': item.deskripsi,
-                'jumlah_barang': item.jumlah_barang,
-                'harga': modified_harga,
-                'gambar': item.gambar,
-                'subtotal': modified_subtotal
-            })
-        # Recalculate totals
-        total_bayar = sum(item['subtotal'] for item in modified_items)
-        dp = nota.dp
-        sisa = total_bayar - dp
         context = {
             'nota': nota,
-            'items': modified_items,
+            'items': items,
             'informasi_toko': informasi_toko,
-            'total_bayar': total_bayar,
-            'dp': dp,
-            'sisa': sisa,
+            'total_bayar': nota.total_bayar,
+            'dp': nota.dp,
+            'sisa': nota.sisa,
         }
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             # Return HTML as JSON for AJAX requests

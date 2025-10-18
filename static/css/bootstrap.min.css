@@ -1,0 +1,400 @@
+/* ------------------- */
+/* --- General Styles --- */
+/* ------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body, html {
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+}
+
+.body-login {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+/* ------------------- */
+/* --- Main Container --- */
+/* ------------------- */
+.login-container {
+    display: flex;
+    width: 90%;
+    max-width: 1200px;
+    height: 90vh;
+    max-height: 800px;
+    background-color: #fff;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    border-radius: 20px;
+    overflow: hidden;
+    animation: containerSlide 0.8s ease-out;
+}
+
+@keyframes containerSlide {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------- */
+/* --- Image Side --- */
+/* ------------------- */
+.login-image-side {
+    flex: 1.2;
+    background: url('https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80') no-repeat center center;
+    background-size: cover;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+}
+
+.login-image-side::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.85) 0%, rgba(118, 75, 162, 0.85) 100%);
+    z-index: 1;
+}
+
+.overlay-text {
+    position: relative;
+    z-index: 2;
+    padding: 40px;
+    max-width: 500px;
+}
+
+.logo-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.logo-brand i {
+    margin-right: 12px;
+    color: #fff;
+}
+
+.logo-brand h2 {
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.overlay-text h1 {
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.overlay-text p {
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.features {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 1rem;
+}
+
+.feature-item i {
+    margin-right: 12px;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ------------------- */
+/* --- Form Side --- */
+/* ------------------- */
+.login-form-side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    padding: 40px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.login-card h2 {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.login-card h3 {
+    font-weight: 600;
+    color: #667eea;
+}
+
+.login-card .logo i {
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+/* ------------------- */
+/* --- Custom Form Elements --- */
+/* ------------------- */
+.form-group-custom {
+    position: relative;
+}
+
+.form-group-custom i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    transition: color 0.3s;
+    z-index: 2;
+}
+
+.form-group-custom .form-control {
+    padding-left: 45px;
+    padding-right: 45px;
+    height: 50px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f9f9f9;
+}
+
+.form-group-custom .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    outline: none;
+    background-color: #fff;
+}
+
+.form-group-custom .form-control:focus + i {
+    color: #667eea;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.3s;
+    z-index: 2;
+}
+
+.toggle-password:hover {
+    color: #667eea;
+}
+
+/* ------------------- */
+/* --- Custom Button --- */
+/* ------------------- */
+.btn-login-custom {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-login-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-login-custom:active {
+    transform: translateY(0);
+}
+
+.btn-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ------------------- */
+/* --- Links & Checkbox --- */
+/* ------------------- */
+.login-card a {
+    color: #667eea;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.login-card a:hover {
+    color: #764ba2;
+    text-decoration: underline !important;
+}
+
+.forgot-password {
+    font-size: 0.9rem;
+}
+
+.signup-link {
+    font-weight: 600;
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+/* ------------------- */
+/* --- Divider --- */
+/* ------------------- */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.divider::before {
+    margin-right: 10px;
+}
+
+.divider::after {
+    margin-left: 10px;
+}
+
+/* ------------------- */
+/* --- Social Login --- */
+/* ------------------- */
+.social-login {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.social-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* ------------------- */
+/* --- Alert Styling --- */
+/* ------------------- */
+.alert {
+    border-radius: 10px;
+    border: none;
+    font-size: 0.9rem;
+    padding: 12px 16px;
+}
+
+.alert-danger {
+    background-color: #fdf2f2;
+    color: #9b1c1c;
+    border-left: 4px solid #f98080;
+}
+
+/* ------------------- */
+/* --- Responsive Design --- */
+/* ------------------- */
+@media (max-width: 992px) {
+    .login-container {
+        flex-direction: column;
+        height: auto;
+        max-height: none;
+        width: 95%;
+        margin: 20px 0;
+    }
+    
+    .login-image-side {
+        flex: none;
+        height: 200px;
+        width: 100%;
+    }
+    
+    .overlay-text {
+        padding: 20px;
+    }
+    
+    .overlay-text h1 {
+        font-size: 1.8rem;
+    }
+    
+    .features {
+        display: none;
+    }
+    
+    .logo-brand {
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-form-side {
+        padding: 20px;
+    }
+    
+    .login-card {
+        padding: 25px 20px;
+    }
+    
+    .social-login {
+        gap: 10px;
+    }
+    
+    .social-btn {
+        width: 40px;
+        height: 40px;
+    }
+}
