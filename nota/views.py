@@ -11,88 +11,111 @@ from decimal import Decimal
 
 # Create your views here.
 def nota_kosong(request):
+    # Get or create temporary NotaPayment
+    temp_nota_id = request.session.get('temp_nota_id')
+    if not temp_nota_id:
+        # Create a temporary NotaPayment with dummy data (no customer yet)
+        temp_nota = NotaPayment.objects.create(
+            customer=None,  # No customer initially
+            tanggal_sisa_bayar='2023-01-01',  # Dummy date
+            metode_pembayaran='tunai',
+            total_bayar=0,
+            dp=0,
+            sisa=0,
+            is_temporary=True
+        )
+        temp_nota_id = temp_nota.id
+        request.session['temp_nota_id'] = temp_nota_id
+    else:
+        try:
+            temp_nota = NotaPayment.objects.get(id=temp_nota_id, is_temporary=True)
+        except NotaPayment.DoesNotExist:
+            # If temp nota doesn't exist, create new one
+            temp_nota = NotaPayment.objects.create(
+                customer=None,
+                tanggal_sisa_bayar='2023-01-01',
+                metode_pembayaran='tunai',
+                total_bayar=0,
+                dp=0,
+                sisa=0,
+                is_temporary=True
+            )
+            temp_nota_id = temp_nota.id
+            request.session['temp_nota_id'] = temp_nota_id
+
     if request.method == 'POST':
         if 'add_item' in request.POST:
             form = NotaKosongForm(request.POST, request.FILES)
             if form.is_valid():
-                # Instead of saving to DB, add to session cart
-                cart = request.session.get('cart_nota', [])
-                gambar_url = None
+                # Save directly to DB
+                gambar_path = None
                 if form.cleaned_data['gambar']:
-                    # Save the file temporarily and get URL
                     from django.core.files.storage import default_storage
-                    file_name = default_storage.save(f"temp_{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
-                    gambar_url = default_storage.url(file_name)
-                item = {
-                    'id': str(uuid.uuid4()),
-                    'kode_barang': form.cleaned_data['kode_barang'],
-                    'nama_barang': form.cleaned_data['nama_barang'],
-                    'deskripsi': form.cleaned_data['deskripsi'],
-                    'jumlah_barang': form.cleaned_data['jumlah_barang'],
-                    'harga': float(form.cleaned_data['harga']),
-                    'gambar': gambar_url,
-                    'subtotal': float(form.cleaned_data['harga']) * form.cleaned_data['jumlah_barang']
-                }
-                cart.append(item)
-                request.session['cart_nota'] = cart
-                messages.success(request, 'Barang berhasil ditambahkan ke keranjang!')
+                    file_name = default_storage.save(f"gambar_barang/{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
+                    gambar_path = file_name
+                NotaKosong.objects.create(
+                    nota_payment=temp_nota,
+                    kode_barang=form.cleaned_data['kode_barang'],
+                    nama_barang=form.cleaned_data['nama_barang'],
+                    deskripsi=form.cleaned_data['deskripsi'],
+                    jumlah_barang=form.cleaned_data['jumlah_barang'],
+                    harga=form.cleaned_data['harga'],
+                    gambar=gambar_path
+                )
+                messages.success(request, 'Barang berhasil ditambahkan!')
                 return redirect('nota:nota-kosong')
         elif 'submit_payment' in request.POST:
             payment_form = NotaPaymentForm(request.POST)
             if payment_form.is_valid():
-                cart = request.session.get('cart_nota', [])
-                if not cart:
+                # Get items from DB
+                items = NotaKosong.objects.filter(nota_payment=temp_nota)
+                if not items.exists():
                     messages.error(request, 'Keranjang kosong!')
                     return redirect('nota:nota-kosong')
-                total = sum(item['subtotal'] for item in cart)
-                dp = float(payment_form.cleaned_data['dp'])
+                total = sum(item.subtotal for item in items)
+                dp = payment_form.cleaned_data['dp']
                 sisa = total - dp
                 if sisa < 0:
                     messages.error(request, 'DP tidak boleh lebih dari total!')
                     return redirect('nota:nota-kosong')
-                # Save to database
-                nota_payment = NotaPayment.objects.create(
-                    customer=payment_form.cleaned_data['customer'],
-                    tanggal_sisa_bayar=payment_form.cleaned_data['tanggal_sisa_bayar'],
-                    metode_pembayaran=payment_form.cleaned_data['metode_pembayaran'],
-                    total_bayar=total,
-                    dp=dp,
-                    sisa=sisa
-                )
-                for item in cart:
-                    # Extract image path if exists
-                    gambar_path = None
-                    if item['gambar']:
-                        # Assuming gambar is URL like /media/temp_... or /media/gambar_barang/...
-                        # Extract the relative path
-                        if '/media/' in item['gambar']:
-                            gambar_path = item['gambar'].split('/media/')[1]
-                        else:
-                            gambar_path = item['gambar']
-                    NotaKosong.objects.create(
-                        nota_payment=nota_payment,
-                        kode_barang=item['kode_barang'],
-                        nama_barang=item['nama_barang'],
-                        deskripsi=item['deskripsi'],
-                        jumlah_barang=item['jumlah_barang'],
-                        harga=item['harga'],
-                        gambar=gambar_path
-                    )
-                # Clear cart
-                request.session['cart_nota'] = []
+                # Update temporary NotaPayment with real data
+                temp_nota.customer = payment_form.cleaned_data['customer']
+                temp_nota.tanggal_sisa_bayar = payment_form.cleaned_data['tanggal_sisa_bayar']
+                temp_nota.metode_pembayaran = payment_form.cleaned_data['metode_pembayaran']
+                temp_nota.total_bayar = total
+                temp_nota.dp = dp
+                temp_nota.sisa = sisa
+                temp_nota.is_temporary = False
+                temp_nota.save()
+                # Clear session
+                if 'temp_nota_id' in request.session:
+                    del request.session['temp_nota_id']
                 messages.success(request, 'Nota berhasil disimpan!')
                 return redirect('nota:nota-kosong')
     else:
         form = NotaKosongForm()
         payment_form = NotaPaymentForm()
 
-    cart = request.session.get('cart_nota', [])
-    total = sum(item['subtotal'] for item in cart)
+    # Load daftar_barang from DB
+    daftar_barang = []
+    for item in NotaKosong.objects.filter(nota_payment=temp_nota):
+        daftar_barang.append({
+            'id': str(item.id),
+            'db_id': item.id,
+            'kode_barang': item.kode_barang,
+            'nama_barang': item.nama_barang,
+            'deskripsi': item.deskripsi,
+            'jumlah_barang': item.jumlah_barang,
+            'harga': float(item.harga),
+            'gambar': item.gambar.url if item.gambar else None,
+            'subtotal': float(item.subtotal)
+        })
+    total = sum(item['subtotal'] for item in daftar_barang)
 
     konteks = {
         'form': form,
         'payment_form': payment_form,
-        'daftar_barang': cart,
+        'daftar_barang': daftar_barang,
         'total': total
     }
     return render(request, 'nota_kosong.html', konteks)
@@ -103,26 +126,17 @@ def update_quantity(request, item_id):
         try:
             data = json.loads(request.body)
             change = data.get('change', 0)
-            cart = request.session.get('cart_nota', [])
-            for item in cart:
-                if item['id'] == item_id:
-                    item['jumlah_barang'] = max(0, item['jumlah_barang'] + change)
-                    item['subtotal'] = item['harga'] * item['jumlah_barang']
-                    # If this is a database item, update the DB
-                    if 'db_id' in item:
-                        from .models import NotaKosong
-                        db_item = NotaKosong.objects.get(id=item['db_id'])
-                        db_item.jumlah_barang = item['jumlah_barang']
-                        db_item.save()
-                    break
-            request.session['cart_nota'] = cart
-            item = next((i for i in cart if i['id'] == item_id), None)
-            if item:
-                return JsonResponse({
-                    'success': True,
-                    'new_quantity': item['jumlah_barang'],
-                    'new_subtotal': f"{item['subtotal']:,.0f}"
-                })
+            # Update directly in DB
+            db_item = NotaKosong.objects.get(id=item_id)
+            db_item.jumlah_barang = max(0, db_item.jumlah_barang + change)
+            db_item.save()
+            return JsonResponse({
+                'success': True,
+                'new_quantity': db_item.jumlah_barang,
+                'new_subtotal': f"{db_item.subtotal:,.0f}"
+            })
+        except NotaKosong.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Item not found'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False})
@@ -130,23 +144,12 @@ def update_quantity(request, item_id):
 @csrf_exempt
 def delete_item(request, item_id):
     if request.method == 'POST':
-        cart = request.session.get('cart_nota', [])
-        # Find the item to delete
-        item_to_delete = None
-        for item in cart:
-            if item['id'] == item_id:
-                item_to_delete = item
-                break
-
-        if item_to_delete and 'db_id' in item_to_delete:
-            # Delete from database
-            from .models import NotaKosong
-            NotaKosong.objects.filter(id=item_to_delete['db_id']).delete()
-
-        # Remove from cart
-        cart = [item for item in cart if item['id'] != item_id]
-        request.session['cart_nota'] = cart
-        return JsonResponse({'success': True})
+        try:
+            # Delete directly from DB
+            NotaKosong.objects.filter(id=item_id).delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False})
 
 def cetak_nota_kosong(request):
@@ -175,127 +178,59 @@ def edit_nota(request, nota_id):
         messages.error(request, 'Nota tidak ditemukan.')
         return redirect('nota:cetak-nota-kosong')
 
-    # Initialize cart from session, or load from DB if session is empty
-    cart = request.session.get('cart_nota', [])
-    if not cart:
-        # Load existing items into cart only if session cart is empty
-        cart = []
-        for item in nota.items.all():
-            cart.append({
-                'id': str(uuid.uuid4()),
-                'db_id': item.id,
-                'kode_barang': item.kode_barang,
-                'nama_barang': item.nama_barang,
-                'deskripsi': item.deskripsi,
-                'jumlah_barang': item.jumlah_barang,
-                'harga': float(item.harga),
-                'gambar': item.gambar.url if item.gambar else None,
-                'subtotal': float(item.subtotal)
-            })
-        request.session['cart_nota'] = cart
-
     if request.method == 'POST':
         if 'add_item' in request.POST:
             form = NotaKosongForm(request.POST, request.FILES)
             if form.is_valid():
-                gambar_url = None
+                # Save directly to DB
+                gambar_path = None
                 if form.cleaned_data['gambar']:
                     from django.core.files.storage import default_storage
-                    file_name = default_storage.save(f"temp_{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
-                    gambar_url = default_storage.url(file_name)
-                item = {
-                    'id': str(uuid.uuid4()),
-                    'kode_barang': form.cleaned_data['kode_barang'],
-                    'nama_barang': form.cleaned_data['nama_barang'],
-                    'deskripsi': form.cleaned_data['deskripsi'],
-                    'jumlah_barang': form.cleaned_data['jumlah_barang'],
-                    'harga': float(form.cleaned_data['harga']),
-                    'gambar': gambar_url,
-                    'subtotal': float(form.cleaned_data['harga']) * form.cleaned_data['jumlah_barang']
-                }
-                cart.append(item)
-                request.session['cart_nota'] = cart
-                messages.success(request, 'Barang berhasil ditambahkan ke keranjang!')
+                    file_name = default_storage.save(f"gambar_barang/{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
+                    gambar_path = file_name
+                NotaKosong.objects.create(
+                    nota_payment=nota,
+                    kode_barang=form.cleaned_data['kode_barang'],
+                    nama_barang=form.cleaned_data['nama_barang'],
+                    deskripsi=form.cleaned_data['deskripsi'],
+                    jumlah_barang=form.cleaned_data['jumlah_barang'],
+                    harga=form.cleaned_data['harga'],
+                    gambar=gambar_path
+                )
+                messages.success(request, 'Barang berhasil ditambahkan!')
                 return redirect('nota:edit_nota', nota_id=nota_id)
         elif 'update_item' in request.POST:
             item_id = request.POST.get('item_id')
             form = NotaKosongForm(request.POST, request.FILES)
             if form.is_valid() and item_id:
-                for item in cart:
-                    if item['id'] == item_id:
-                        item['kode_barang'] = form.cleaned_data['kode_barang']
-                        item['nama_barang'] = form.cleaned_data['nama_barang']
-                        item['deskripsi'] = form.cleaned_data['deskripsi']
-                        item['jumlah_barang'] = form.cleaned_data['jumlah_barang']
-                        item['harga'] = float(form.cleaned_data['harga'])
-                        if form.cleaned_data['gambar']:
-                            from django.core.files.storage import default_storage
-                            file_name = default_storage.save(f"temp_{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
-                            item['gambar'] = default_storage.url(file_name)
-                        item['subtotal'] = item['harga'] * item['jumlah_barang']
-                        break
-                request.session['cart_nota'] = cart
-                messages.success(request, 'Barang berhasil diupdate!')
+                try:
+                    db_item = NotaKosong.objects.get(id=item_id, nota_payment=nota)
+                    db_item.kode_barang = form.cleaned_data['kode_barang']
+                    db_item.nama_barang = form.cleaned_data['nama_barang']
+                    db_item.deskripsi = form.cleaned_data['deskripsi']
+                    db_item.jumlah_barang = form.cleaned_data['jumlah_barang']
+                    db_item.harga = form.cleaned_data['harga']
+                    if form.cleaned_data['gambar']:
+                        from django.core.files.storage import default_storage
+                        file_name = default_storage.save(f"gambar_barang/{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
+                        db_item.gambar = file_name
+                    db_item.save()
+                    messages.success(request, 'Barang berhasil diupdate!')
+                except NotaKosong.DoesNotExist:
+                    messages.error(request, 'Item tidak ditemukan.')
                 return redirect('nota:edit_nota', nota_id=nota_id)
         elif 'submit_payment' in request.POST:
             payment_form = NotaPaymentForm(request.POST, instance=nota)
             if payment_form.is_valid():
-                if not cart:
+                # Get items from DB
+                items = NotaKosong.objects.filter(nota_payment=nota)
+                if not items.exists():
                     messages.error(request, 'Keranjang kosong!')
                     return redirect('nota:edit_nota', nota_id=nota_id)
 
-                # Get existing items
-                existing_items = {item.id: item for item in nota.items.all()}
-
-                # Track items in cart
-                cart_item_ids = set()
-                for item in cart:
-                    db_id = item.get('db_id')
-                    if db_id and db_id in existing_items:
-                        # Update existing
-                        existing_item = existing_items[db_id]
-                        existing_item.kode_barang = item['kode_barang']
-                        existing_item.nama_barang = item['nama_barang']
-                        existing_item.deskripsi = item['deskripsi']
-                        existing_item.jumlah_barang = item['jumlah_barang']
-                        existing_item.harga = item['harga']
-                        # Extract image path from URL
-                        gambar_path = None
-                        if item['gambar']:
-                            if '/media/' in item['gambar']:
-                                gambar_path = item['gambar'].split('/media/')[1]
-                            else:
-                                gambar_path = item['gambar']
-                        existing_item.gambar = gambar_path
-                        existing_item.save()
-                        cart_item_ids.add(db_id)
-                    else:
-                        # Create new
-                        # Extract image path from URL
-                        gambar_path = None
-                        if item['gambar']:
-                            if '/media/' in item['gambar']:
-                                gambar_path = item['gambar'].split('/media/')[1]
-                            else:
-                                gambar_path = item['gambar']
-                        NotaKosong.objects.create(
-                            nota_payment=nota,
-                            kode_barang=item['kode_barang'],
-                            nama_barang=item['nama_barang'],
-                            deskripsi=item['deskripsi'],
-                            jumlah_barang=item['jumlah_barang'],
-                            harga=item['harga'],
-                            gambar=gambar_path
-                        )
-
-                # Delete items not in cart
-                for db_id, item in existing_items.items():
-                    if db_id not in cart_item_ids:
-                        item.delete()
-
                 # Update nota totals
-                total = sum(item['subtotal'] for item in cart)
-                dp = float(payment_form.cleaned_data['dp'])
+                total = sum(item.subtotal for item in items)
+                dp = payment_form.cleaned_data['dp']
                 sisa = total - dp
                 nota.customer = payment_form.cleaned_data['customer']
                 nota.tanggal_sisa_bayar = payment_form.cleaned_data['tanggal_sisa_bayar']
@@ -305,19 +240,32 @@ def edit_nota(request, nota_id):
                 nota.sisa = sisa
                 nota.save()
 
-                # Clear cart
-                request.session['cart_nota'] = []
                 messages.success(request, 'Nota berhasil diupdate!')
                 return redirect('nota:cetak-nota-kosong')
 
     form = NotaKosongForm()
     payment_form = NotaPaymentForm(instance=nota)
-    total = sum(item['subtotal'] for item in cart)
+
+    # Load daftar_barang from DB
+    daftar_barang = []
+    for item in NotaKosong.objects.filter(nota_payment=nota):
+        daftar_barang.append({
+            'id': str(item.id),
+            'db_id': item.id,
+            'kode_barang': item.kode_barang,
+            'nama_barang': item.nama_barang,
+            'deskripsi': item.deskripsi,
+            'jumlah_barang': item.jumlah_barang,
+            'harga': float(item.harga),
+            'gambar': item.gambar.url if item.gambar else None,
+            'subtotal': float(item.subtotal)
+        })
+    total = sum(item['subtotal'] for item in daftar_barang)
 
     konteks = {
         'form': form,
         'payment_form': payment_form,
-        'daftar_barang': cart,
+        'daftar_barang': daftar_barang,
         'total': total,
         'nota': nota
     }

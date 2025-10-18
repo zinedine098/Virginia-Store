@@ -38,3 +38,9 @@ class NotaPaymentForm(forms.ModelForm):
             'metode_pembayaran': forms.Select(attrs={'class': 'form-control'}),
             'dp': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'DP'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make customer field optional
+        self.fields['customer'].required = False
+        self.fields['customer'].empty_label = "Pilih Pelanggan (Opsional)"

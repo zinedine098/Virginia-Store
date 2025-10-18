@@ -7,16 +7,18 @@ class NotaPayment(models.Model):
         ('debit', 'Debit'),
     ]
 
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
     tanggal_sisa_bayar = models.DateField()
     metode_pembayaran = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES)
     total_bayar = models.DecimalField(max_digits=12, decimal_places=2)
     dp = models.DecimalField(max_digits=12, decimal_places=2)
     sisa = models.DecimalField(max_digits=12, decimal_places=2)
+    is_temporary = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Nota Payment {self.id} - {self.customer.nama} - {self.total_bayar}"
+        customer_name = self.customer.nama if self.customer else "No Customer"
+        return f"Nota Payment {self.id} - {customer_name} - {self.total_bayar}"
 
     class Meta:
         verbose_name = "Nota Payment"
