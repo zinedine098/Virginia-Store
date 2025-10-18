@@ -153,7 +153,7 @@ def delete_item(request, item_id):
     return JsonResponse({'success': False})
 
 def cetak_nota_kosong(request):
-    notas = NotaPayment.objects.all().order_by('-created_at')
+    notas = NotaPayment.objects.filter(is_temporary=False).order_by('-created_at')
     return render(request, 'cetak_nota_kosong.html', {'notas': notas})
 
 def edit_dp(request, nota_id):
@@ -297,9 +297,14 @@ def nota_palsu(request, nota_id):
         potongan = request.POST.get('potongan')
         try:
             nota = NotaPayment.objects.get(id=nota_id)
-            # Apply potongan to total_bayar
+            # Apply potongan to each item's harga
             potongan_decimal = Decimal(potongan) / 100
-            nota.total_bayar = nota.total_bayar * (1 - potongan_decimal)
+            items = NotaKosong.objects.filter(nota_payment=nota)
+            for item in items:
+                item.harga = item.harga * (1 - potongan_decimal)
+                item.save()
+            # Recalculate totals
+            nota.total_bayar = sum(item.subtotal for item in items)
             nota.sisa = nota.total_bayar - nota.dp
             nota.save()
             return JsonResponse({'success': True})
@@ -315,14 +320,23 @@ def cetak_pdf_nota_palsu(request, nota_id):
         persen_decimal = Decimal(persen) / 100 if persen else Decimal(0)
         from kasir.models import InformasiToko
         informasi_toko = InformasiToko.objects.first()
-        # Apply potongan to items
+        # Apply potongan to items without modifying originals
         modified_items = []
         for item in items:
-            modified_item = item
-            modified_item.harga = item.harga * (1 - persen_decimal)
-            modified_items.append(modified_item)
+            modified_harga = item.harga * (1 - persen_decimal)
+            modified_subtotal = modified_harga * item.jumlah_barang
+            modified_items.append({
+                'id': item.id,
+                'kode_barang': item.kode_barang,
+                'nama_barang': item.nama_barang,
+                'deskripsi': item.deskripsi,
+                'jumlah_barang': item.jumlah_barang,
+                'harga': modified_harga,
+                'gambar': item.gambar,
+                'subtotal': modified_subtotal
+            })
         # Recalculate totals
-        total_bayar = sum(item.subtotal for item in modified_items)
+        total_bayar = sum(item['subtotal'] for item in modified_items)
         dp = nota.dp
         sisa = total_bayar - dp
         context = {
