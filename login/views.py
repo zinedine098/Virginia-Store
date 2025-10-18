@@ -2,6 +2,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.http import JsonResponse
 from .models import UserProfile
 
 def login_view(request):
@@ -33,6 +34,6 @@ def profile_view(request):
         if 'foto_profile' in request.FILES:
             profile.foto_profile = request.FILES['foto_profile']
         profile.save()
-        messages.success(request, 'Profile updated successfully!')
-        return redirect('profile')
+        # Return JSON response for AJAX
+        return JsonResponse({'success': True, 'message': 'Profile updated successfully!'})
     return render(request, 'profile.html', {'profile': profile})

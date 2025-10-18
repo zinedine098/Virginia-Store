@@ -107,7 +107,7 @@
                                 </div>
                             </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i> Profile</a></li>
+                            <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="fas fa-user me-2"></i> Profile</button></li>
                             <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                         </ul>
                     </li>
@@ -192,6 +192,99 @@
                 form.addEventListener('submit', function() {
                     unformatCurrencyInputs(this);
                 });
+            });
+        });
+    </script>
+
+    <!-- Profile Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileModalLabel">Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" enctype="multipart/form-data" id="profileForm">
+                        {% csrf_token %}
+                        <div class="text-center mb-4">
+                            {% if user_profile.foto_profile %}
+                                <img src="{{ user_profile.foto_profile.url }}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            {% else %}
+                                <i class="fas fa-user-circle mb-3" style="font-size: 150px; color: #ccc;"></i>
+                            {% endif %}
+                            <div class="mb-3">
+                                <label for="foto_profile" class="form-label">Foto Profile</label>
+                                <input type="file" class="form-control" id="foto_profile" name="foto_profile" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nama" class="form-label">Nama</label>
+                                    <input type="text" class="form-control" id="nama" name="nama" value="{{ user_profile.nama|default:'' }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-control" id="status" name="status">
+                                        <option value="kasir" {% if user_profile.status == 'kasir' %}selected{% endif %}>Kasir</option>
+                                        <option value="admin" {% if user_profile.status == 'admin' %}selected{% endif %}>Admin</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="slogan" class="form-label">Slogan</label>
+                                    <input type="text" class="form-control" id="slogan" name="slogan" value="{{ user_profile.slogan|default:'' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="alamat" class="form-label">Alamat</label>
+                                    <textarea class="form-control" id="alamat" name="alamat" rows="3">{{ user_profile.alamat|default:'' }}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="no_telepon" class="form-label">No. Telepon</label>
+                                    <input type="text" class="form-control" id="no_telepon" name="no_telepon" value="{{ user_profile.no_telephon|default:'' }}">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" form="profileForm">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle profile form submission via AJAX
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('{% url "profile" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal and show success message
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('profileModal'));
+                    modal.hide();
+                    alert('Profile updated successfully!');
+                    // Reload page to reflect changes
+                    location.reload();
+                } else {
+                    alert('Error updating profile: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the profile.');
             });
         });
     </script>
