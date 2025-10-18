@@ -8,7 +8,35 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Sum, Max
 from decimal import Decimal
 import json
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from .decorators import no_cache
 
+
+
+
+
+def halaman_login(request):
+    if request.method == "POST":
+        nama_pengguna = request.POST.get('username')
+        kata_sandi = request.POST.get('password')
+
+        pengguna = authenticate(request, username=nama_pengguna, password=kata_sandi)
+
+        if pengguna is not None:
+            login(request, pengguna)
+            return redirect('halaman_kasir')  # arahkan ke halaman utama
+        else:
+            messages.error(request, "Username atau password salah.")
+    
+    return render(request, 'login.html')
+
+def halaman_logout(request):
+    logout(request)
+    return redirect('login')
+
+@login_required(login_url='login')
+@no_cache
 def halaman_kasir(request):
     produk = Produk.objects.all()
     # Get or create current transaksi in session
