@@ -280,6 +280,9 @@ def cetak_pdf(request, nota_id):
             'nota': nota,
             'items': items,
             'informasi_toko': informasi_toko,
+            'total_bayar': nota.total_bayar,
+            'dp': nota.dp,
+            'sisa': nota.sisa,
         }
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             # Return HTML as JSON for AJAX requests
