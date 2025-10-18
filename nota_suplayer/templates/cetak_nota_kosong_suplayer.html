@@ -21,7 +21,7 @@
             <tr data-id="{{ nota.id }}" data-total="{{ nota.total_bayar }}" data-dp="{{ nota.dp }}" data-sisa="{{ nota.sisa }}" data-tanggal="{{ nota.tanggal_sisa_bayar|date:'Y-m-d' }}">
                 <td>{{ forloop.counter }}</td>
                 <td>{{ nota.created_at|date:"d/m/Y H:i" }}</td>
-                <td>{{ nota.suplayer.nama }}</td>
+                <td>{% if nota.suplayer %}{{ nota.suplayer.nama }}{% else %}Belum Ditentukan{% endif %}</td>
                 <td>{{ nota.get_metode_pembayaran_display }}</td>
                 <td>Rp. {{ nota.total_bayar|floatformat:0 }}</td>
                 <td>Rp. {{ nota.dp|floatformat:0 }}</td>
