@@ -28,9 +28,9 @@
                 <td>Rp. {{ nota.sisa|floatformat:0 }}</td>
                 <td>{{ nota.tanggal_sisa_bayar|date:"d/m/Y" }}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary" data-id="{{ nota.id }}" onclick="cetakPdf(this)">Cetak PDF</button>
+                    <button class="btn btn-sm btn-danger" data-id="{{ nota.id }}" onclick="cetakPdf(this)">Cetak PDF</button>
                     <button class="btn btn-sm btn-warning" data-id="{{ nota.id }}" onclick="editDp(this)">Edit DP</button>
-                    <button class="btn btn-sm btn-info" data-id="{{ nota.id }}" onclick="editNota(this)">Edit Nota</button>
+                    <button class="btn btn-sm btn-primary" data-id="{{ nota.id }}" onclick="editNota(this)">Edit Nota</button>
                     <button class="btn btn-sm btn-secondary" data-id="{{ nota.id }}" onclick="notaPalsu(this)">Nota Palsu</button>
                 </td>
             </tr>

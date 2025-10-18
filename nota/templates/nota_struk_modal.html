@@ -64,7 +64,7 @@
           <td>{{ item.kode_barang }}</td>
           <td>
             {% if item.gambar %}
-              <img src="{{ item.gambar }}" class="foto-produk">
+              <img src="{{ item.gambar.url }}" class="foto-produk">
             {% else %}
               <span>-</span>
             {% endif %}

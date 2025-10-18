@@ -1,3 +1,5 @@
-# TODO List for Editing nota_suplayer/views.py
-
-- [x] Replace all occurrences of 'nota:' with 'nota_suplayer:' in redirect calls within nota_suplayer/views.py to ensure the app uses its own namespace and avoids saving data to the nota app.
+- [x] Ubah redirect setelah submit_payment di nota_kosong ke cetak_nota_kosong_suplayer
+- [x] Perbaiki penyimpanan gambar: simpan langsung ke 'gambar_barang/' di add_item
+- [x] Ketika save ke DB, ekstrak path dari URL
+- [x] Pastikan template menampilkan gambar dengan benar
+- [ ] Test cetak PDF setelah perubahan

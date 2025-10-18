@@ -60,6 +60,15 @@ def nota_kosong(request):
                     sisa=sisa
                 )
                 for item in cart:
+                    # Extract image path if exists
+                    gambar_path = None
+                    if item['gambar']:
+                        # Assuming gambar is URL like /media/temp_... or /media/gambar_barang/...
+                        # Extract the relative path
+                        if '/media/' in item['gambar']:
+                            gambar_path = item['gambar'].split('/media/')[1]
+                        else:
+                            gambar_path = item['gambar']
                     NotaKosong.objects.create(
                         nota_payment=nota_payment,
                         kode_barang=item['kode_barang'],
@@ -67,7 +76,7 @@ def nota_kosong(request):
                         deskripsi=item['deskripsi'],
                         jumlah_barang=item['jumlah_barang'],
                         harga=item['harga'],
-                        gambar=item['gambar']
+                        gambar=gambar_path
                     )
                 # Clear cart
                 request.session['cart_nota'] = []
@@ -250,11 +259,25 @@ def edit_nota(request, nota_id):
                         existing_item.deskripsi = item['deskripsi']
                         existing_item.jumlah_barang = item['jumlah_barang']
                         existing_item.harga = item['harga']
-                        existing_item.gambar = item['gambar']
+                        # Extract image path from URL
+                        gambar_path = None
+                        if item['gambar']:
+                            if '/media/' in item['gambar']:
+                                gambar_path = item['gambar'].split('/media/')[1]
+                            else:
+                                gambar_path = item['gambar']
+                        existing_item.gambar = gambar_path
                         existing_item.save()
                         cart_item_ids.add(db_id)
                     else:
                         # Create new
+                        # Extract image path from URL
+                        gambar_path = None
+                        if item['gambar']:
+                            if '/media/' in item['gambar']:
+                                gambar_path = item['gambar'].split('/media/')[1]
+                            else:
+                                gambar_path = item['gambar']
                         NotaKosong.objects.create(
                             nota_payment=nota,
                             kode_barang=item['kode_barang'],
@@ -262,7 +285,7 @@ def edit_nota(request, nota_id):
                             deskripsi=item['deskripsi'],
                             jumlah_barang=item['jumlah_barang'],
                             harga=item['harga'],
-                            gambar=item['gambar']
+                            gambar=gambar_path
                         )
 
                 # Delete items not in cart

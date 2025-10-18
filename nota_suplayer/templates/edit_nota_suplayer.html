@@ -132,7 +132,7 @@
                                     <th style="width: 30%;">Pelanggan</th>
                                     <td style="width: 70%;">
                                         <div class="input-group">
-                                            {{ payment_form.customer }}
+                                            {{ payment_form.suplayer }}
                                             <button type="button" class="btn btn-warning"
                                                 data-bs-toggle="modal" data-bs-target="#addCustomerModal">
                                                 Tambah
@@ -167,7 +167,7 @@
                                             <button type="submit" class="btn btn-success">
                                                 Simpan Perubahan
                                             </button>
-                                            <a href="{% url 'nota:cetak-nota-kosong' %}" class="btn btn-secondary">Kembali</a>
+                                            <a href="{% url 'nota_suplayer:cetak-nota-kosong' %}" class="btn btn-secondary">Kembali</a>
                                         </div>
                                     </td>
                                 </tr>
@@ -186,7 +186,7 @@
 let editingItemId = null;
 
 function updateQuantity(id, change) {
-    fetch(`/nota/update_quantity/${id}/`, {
+    fetch(`/nota_suplayer/update_quantity_suplayer/${id}/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -230,7 +230,7 @@ function cancelEdit() {
 
 function deleteItem(id) {
     if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
-        fetch(`/nota/delete/${id}/`, {
+        fetch(`/nota_suplayer/delete_item/${id}/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
@@ -268,10 +268,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('id_dp').addEventListener('input', updateSisa);
 });
 
-// Add Customer Modal JavaScript
+// Add Suplayer Modal JavaScript
 function addCustomer() {
     const formData = new FormData(document.getElementById('customerForm'));
-    fetch('/nota/add_customer/', {
+    fetch('/nota_suplayer/add_suplayer/', {
         method: 'POST',
         body: formData,
         headers: {
@@ -282,10 +282,10 @@ function addCustomer() {
     .then(data => {
         if (data.success) {
             // Add new option to select
-            const select = document.getElementById('id_customer');
-            const option = new Option(data.customer_name, data.customer_id);
+            const select = document.getElementById('id_suplayer');
+            const option = new Option(data.suplayer_name, data.suplayer_id);
             select.add(option);
-            select.value = data.customer_id;
+            select.value = data.suplayer_id;
             // Close modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerModal'));
             modal.hide();

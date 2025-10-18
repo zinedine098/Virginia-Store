@@ -7,7 +7,7 @@
             <tr>
                 <th>No</th>
                 <th>Waktu Transaksi</th>
-                <th>Pelanggan</th>
+                <th>Suplayer</th>
                 <th>Metode Bayar</th>
                 <th>Total Bayar</th>
                 <th>DP</th>
@@ -20,23 +20,24 @@
             {% for nota in notas %}
             <tr data-id="{{ nota.id }}" data-total="{{ nota.total_bayar }}" data-dp="{{ nota.dp }}" data-sisa="{{ nota.sisa }}" data-tanggal="{{ nota.tanggal_sisa_bayar|date:'Y-m-d' }}">
                 <td>{{ forloop.counter }}</td>
-                <td>{{ nota_suplayer.created_at|date:"d/m/Y H:i" }}</td>
-                <td>{{ nota_suplayer.suplayer.nama }}</td>
-                <td>{{ nota_suplayer.get_metode_pembayaran_display }}</td>
-                <td>Rp. {{ nota_suplayer.total_bayar|floatformat:0 }}</td>
-                <td>Rp. {{ nota_suplayer.dp|floatformat:0 }}</td>
-                <td>Rp. {{ nota_suplayer.sisa|floatformat:0 }}</td>
-                <td>{{ nota_suplayer.tanggal_sisa_bayar|date:"d/m/Y" }}</td>
+                <td>{{ nota.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ nota.suplayer.nama }}</td>
+                <td>{{ nota.get_metode_pembayaran_display }}</td>
+                <td>Rp. {{ nota.total_bayar|floatformat:0 }}</td>
+                <td>Rp. {{ nota.dp|floatformat:0 }}</td>
+                <td>Rp. {{ nota.sisa|floatformat:0 }}</td>
+                <td>{{ nota.tanggal_sisa_bayar|date:"d/m/Y" }}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary" data-id="{{ nota_suplayer.id }}" onclick="cetakPdf(this)">Cetak PDF</button>
-                    <button class="btn btn-sm btn-warning" data-id="{{ nota_suplayer.id }}" onclick="editDp(this)">Edit DP</button>
-                    <button class="btn btn-sm btn-info" data-id="{{ nota_suplayer.id }}" onclick="editNota(this)">Edit Nota</button>
-                    <button class="btn btn-sm btn-secondary" data-id="{{ nota_suplayer.id }}" onclick="notaPalsu(this)">Nota Palsu</button>
+                    <button class="btn btn-sm btn-danger" data-id="{{ nota.id }}" onclick="cetakPdf(this)">Cetak PDF</button>
+                    <button class="btn btn-sm btn-warning" data-id="{{ nota.id }}" onclick="editDp(this)">Edit DP</button>
+                    <button class="btn btn-sm btn-primary" data-id="{{ nota.id }}" onclick="editNota(this)">Edit Nota</button>
+                    <button class="btn btn-sm btn-secondary" data-id="{{ nota.id }}" onclick="notaPalsu(this)">Nota Palsu</button>
                 </td>
             </tr>
             {% empty %}
             <tr><td colspan="9" class="text-center">Belum ada data</td></tr>
             {% endfor %}
+
         </tbody>
     </table>
 </div>
@@ -120,7 +121,7 @@
 <script>
 function cetakPdf(button) {
     const id = button.getAttribute('data-id');
-    fetch('/nota/cetak_pdf/' + id + '/', {
+    fetch('/nota_suplayer/cetak_pdf_suplayer/' + id + '/', {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
@@ -177,7 +178,7 @@ document.getElementById('saveDpBtn').addEventListener('click', function() {
     const tanggal = document.getElementById('tanggalSisaBayar').value;
     const dp = unformatCurrency(document.getElementById('jumlahDp').value);
 
-    fetch('/nota/edit_dp/' + currentNotaId + '/', {
+    fetch('/nota_suplayer/edit_dp_suplayer/' + currentNotaId + '/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -197,7 +198,7 @@ document.getElementById('saveDpBtn').addEventListener('click', function() {
 
 function editNota(button) {
     const id = button.getAttribute('data-id');
-    window.location.href = '/nota/edit_nota/' + id + '/';
+    window.location.href = '/nota_suplayer/edit_nota_suplayer/' + id + '/';
 }
 
 function notaPalsu(button) {
@@ -211,7 +212,7 @@ function notaPalsu(button) {
 document.getElementById('prosesPersenBtn').addEventListener('click', function() {
     const persen = document.getElementById('persen').value;
     if (persen) {
-        fetch('/nota/nota_palsu/' + currentNotaId + '/', {
+        fetch('/nota_suplayer/nota_palsu_suplayer/' + currentNotaId + '/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -236,7 +237,7 @@ document.getElementById('prosesPersenBtn').addEventListener('click', function() 
 document.getElementById('cetakPdfNotaPalsuBtn').addEventListener('click', function() {
     const persen = document.getElementById('persen').value;
     if (persen) {
-        fetch('/nota/cetak_pdf_nota_palsu/' + currentNotaId + '/?persen=' + persen, {
+        fetch('/nota_suplayer/cetak_pdf_nota_palsu_suplayer/' + currentNotaId + '/?persen=' + persen, {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'

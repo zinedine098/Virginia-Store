@@ -19,9 +19,9 @@ def nota_kosong(request):
                 cart = request.session.get('cart', [])
                 gambar_url = None
                 if form.cleaned_data['gambar']:
-                    # Save the file temporarily and get URL
+                    # Save the file to gambar_barang directory
                     from django.core.files.storage import default_storage
-                    file_name = default_storage.save(f"temp_{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
+                    file_name = default_storage.save(f"gambar_barang/{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
                     gambar_url = default_storage.url(file_name)
                 item = {
                     'id': str(uuid.uuid4()),
@@ -60,6 +60,15 @@ def nota_kosong(request):
                     sisa=sisa
                 )
                 for item in cart:
+                    # Extract image path if exists
+                    gambar_path = None
+                    if item['gambar']:
+                        # Assuming gambar is URL like /media/temp_... or /media/gambar_barang/...
+                        # Extract the relative path
+                        if '/media/' in item['gambar']:
+                            gambar_path = item['gambar'].split('/media/')[1]
+                        else:
+                            gambar_path = item['gambar']
                     NotaSuplayer.objects.create(
                         nota_payment=nota_payment,
                         kode_barang=item['kode_barang'],
@@ -67,12 +76,12 @@ def nota_kosong(request):
                         deskripsi=item['deskripsi'],
                         jumlah_barang=item['jumlah_barang'],
                         harga=item['harga'],
-                        gambar=item['gambar']
+                        gambar=gambar_path
                     )
                 # Clear cart
                 request.session['cart'] = []
                 messages.success(request, 'Nota berhasil disimpan!')
-                return redirect('nota_suplayer:nota-kosong')
+                return redirect('nota_suplayer:cetak-nota-kosong')
     else:
         form = NotaKosongForm()
         payment_form = NotaPaymentForm()
@@ -92,7 +101,7 @@ def nota_kosong(request):
 def update_quantity(request, item_id):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            data = json.loads(request.body.decode('utf-8'))
             change = data.get('change', 0)
             cart = request.session.get('cart', [])
             for item in cart:
@@ -101,8 +110,8 @@ def update_quantity(request, item_id):
                     item['subtotal'] = item['harga'] * item['jumlah_barang']
                     # If this is a database item, update the DB
                     if 'db_id' in item:
-                        from .models import NotaKosong
-                        db_item = NotaKosong.objects.get(id=item['db_id'])
+                        from .models import NotaSuplayer
+                        db_item = NotaSuplayer.objects.get(id=item['db_id'])
                         db_item.jumlah_barang = item['jumlah_barang']
                         db_item.save()
                     break
@@ -131,8 +140,8 @@ def delete_item(request, item_id):
 
         if item_to_delete and 'db_id' in item_to_delete:
             # Delete from database
-            from .models import NotaKosong
-            NotaKosong.objects.filter(id=item_to_delete['db_id']).delete()
+            from .models import NotaSuplayer
+            NotaSuplayer.objects.filter(id=item_to_delete['db_id']).delete()
 
         # Remove from cart
         cart = [item for item in cart if item['id'] != item_id]
@@ -142,7 +151,7 @@ def delete_item(request, item_id):
 
 def cetak_nota_kosong(request):
     notas = NotaPayment.objects.all().order_by('-created_at')
-    return render(request, 'cetak_nota_kosong.html', {'notas': notas})
+    return render(request, 'cetak_nota_kosong_suplayer.html', {'notas': notas})
 
 def edit_dp(request, nota_id):
     if request.method == 'POST':
@@ -192,7 +201,7 @@ def edit_nota(request, nota_id):
                 gambar_url = None
                 if form.cleaned_data['gambar']:
                     from django.core.files.storage import default_storage
-                    file_name = default_storage.save(f"temp_{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
+                    file_name = default_storage.save(f"gambar_barang/{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
                     gambar_url = default_storage.url(file_name)
                 item = {
                     'id': str(uuid.uuid4()),
@@ -221,7 +230,7 @@ def edit_nota(request, nota_id):
                         item['harga'] = float(form.cleaned_data['harga'])
                         if form.cleaned_data['gambar']:
                             from django.core.files.storage import default_storage
-                            file_name = default_storage.save(f"temp_{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
+                            file_name = default_storage.save(f"gambar_barang/{uuid.uuid4()}_{form.cleaned_data['gambar'].name}", form.cleaned_data['gambar'])
                             item['gambar'] = default_storage.url(file_name)
                         item['subtotal'] = item['harga'] * item['jumlah_barang']
                         break
@@ -250,11 +259,25 @@ def edit_nota(request, nota_id):
                         existing_item.deskripsi = item['deskripsi']
                         existing_item.jumlah_barang = item['jumlah_barang']
                         existing_item.harga = item['harga']
-                        existing_item.gambar = item['gambar']
+                        # Extract image path from URL
+                        gambar_path = None
+                        if item['gambar']:
+                            if '/media/' in item['gambar']:
+                                gambar_path = item['gambar'].split('/media/')[1]
+                            else:
+                                gambar_path = item['gambar']
+                        existing_item.gambar = gambar_path
                         existing_item.save()
                         cart_item_ids.add(db_id)
                     else:
                         # Create new
+                        # Extract image path from URL
+                        gambar_path = None
+                        if item['gambar']:
+                            if '/media/' in item['gambar']:
+                                gambar_path = item['gambar'].split('/media/')[1]
+                            else:
+                                gambar_path = item['gambar']
                         NotaSuplayer.objects.create(
                             nota_payment=nota,
                             kode_barang=item['kode_barang'],
@@ -262,7 +285,7 @@ def edit_nota(request, nota_id):
                             deskripsi=item['deskripsi'],
                             jumlah_barang=item['jumlah_barang'],
                             harga=item['harga'],
-                            gambar=item['gambar']
+                            gambar=gambar_path
                         )
 
                 # Delete items not in cart
@@ -298,7 +321,7 @@ def edit_nota(request, nota_id):
         'total': total,
         'nota': nota
     }
-    return render(request, 'edit_nota.html', konteks)
+    return render(request, 'edit_nota_suplayer.html', konteks)
 
 def cetak_pdf(request, nota_id):
     try:
@@ -313,11 +336,11 @@ def cetak_pdf(request, nota_id):
         }
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             # Return HTML as JSON for AJAX requests
-            html = render(request, 'nota_struk_modal.html', context).content.decode('utf-8')
+            html = render(request, 'nota_struk_modal_suplayer.html', context).content.decode('utf-8')
             return JsonResponse({'success': True, 'html': html})
         else:
             # Render full page for direct access
-            return render(request, 'nota_struk.html', context)
+            return render(request, 'nota_struk_suplayer.html', context)
     except NotaPayment.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Nota not found'})
 
@@ -364,11 +387,11 @@ def cetak_pdf_nota_palsu(request, nota_id):
         }
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             # Return HTML as JSON for AJAX requests
-            html = render(request, 'nota_struk_modal.html', context).content.decode('utf-8')
+            html = render(request, 'nota_struk_modal_suplayer.html', context).content.decode('utf-8')
             return JsonResponse({'success': True, 'html': html})
         else:
             # Render full page for direct access
-            return render(request, 'nota_struk_modal.html', context)
+            return render(request, 'nota_struk_modal_suplayer.html', context)
     except NotaPayment.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Nota not found'})
 
