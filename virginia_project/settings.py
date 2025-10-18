@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'kasir',
     'nota',
     'nota_suplayer',
+    'login',
 ]
 
 MIDDLEWARE = [
@@ -52,7 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
+    'middleware.login_required_middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'virginia_project.urls'
